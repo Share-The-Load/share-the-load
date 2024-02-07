@@ -74,7 +74,9 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     >
       <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
       <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
-      {attemptsCount > 2 && <Text tx="loginScreen.hint" size="sm" weight="light" style={$hint} />}
+      <Text tx="loginScreen.registerDetails" preset="subheading" style={$registerDetails} />
+
+      {/* {attemptsCount > 2 && <Text tx="loginScreen.hint" size="sm" weight="light" style={$hint} />} */}
 
       <TextField
         value={authEmail}
@@ -113,6 +115,13 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         preset="reversed"
         onPress={login}
       />
+       <Button
+        testID="register-button"
+        tx="loginScreen.tapToRegister"
+        style={$registerButton}
+        preset="reversed"
+        onPress={login}
+      />
     </Screen>
   )
 })
@@ -127,7 +136,13 @@ const $signIn: TextStyle = {
 }
 
 const $enterDetails: TextStyle = {
+  marginBottom: spacing.sm,
+}
+
+const $registerDetails: TextStyle = {
   marginBottom: spacing.lg,
+  color: colors.palette.neutral400,
+  fontSize: 16,
 }
 
 const $hint: TextStyle = {
@@ -142,3 +157,9 @@ const $textField: ViewStyle = {
 const $tapButton: ViewStyle = {
   marginTop: spacing.xs,
 }
+
+const $registerButton: ViewStyle = {
+  marginTop: spacing.xs,
+  backgroundColor: colors.palette.accent500,
+}
+

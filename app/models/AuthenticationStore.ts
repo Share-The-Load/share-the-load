@@ -8,7 +8,8 @@ export const AuthenticationStoreModel = types
   })
   .views((store) => ({
     get isAuthenticated() {
-      return !!store.authToken
+      return false
+      // return !!store.authToken
     },
     get validationError() {
       if (store.authEmail.length === 0) return "can't be blank"
@@ -31,5 +32,5 @@ export const AuthenticationStoreModel = types
     },
   }))
 
-export interface AuthenticationStore extends Instance<typeof AuthenticationStoreModel> {}
-export interface AuthenticationStoreSnapshot extends SnapshotOut<typeof AuthenticationStoreModel> {}
+export interface AuthenticationStore extends Instance<typeof AuthenticationStoreModel> { }
+export interface AuthenticationStoreSnapshot extends SnapshotOut<typeof AuthenticationStoreModel> { }
