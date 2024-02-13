@@ -20,6 +20,7 @@ import { useStores } from "../models"
 import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { colors } from "app/theme"
+import { MainNavigator } from "./MainNavigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -37,8 +38,11 @@ import { colors } from "app/theme"
 export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
+  Home: undefined
+  Group: { mode: "find" | "create" }
   Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
+  Register: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -58,23 +62,32 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated },
+    authenticationStore: { isAuthenticated, hasGroup },
   } = useStores()
 
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      initialRouteName={isAuthenticated ? "Welcome" : "Login"}
+      initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
     >
-      {isAuthenticated ? (
+      {isAuthenticated && hasGroup ? (
+        <>
+          {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
+          <Stack.Screen name="Home" component={MainNavigator} />
+        </>
+      ) : isAuthenticated && !hasGroup ? (
         <>
           <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-          <Stack.Screen name="Demo" component={DemoNavigator} />
+          <Stack.Screen name="Group" component={Screens.GroupScreen} />
+
+          <Stack.Screen name="Home" component={Screens.HomeScreen} />
         </>
       ) : (
         <>
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
+
+          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
         </>
       )}
 

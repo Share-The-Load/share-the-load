@@ -7,10 +7,10 @@ const en = {
   },
   welcomeScreen: {
     postscript:
-      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
-    readyForLaunch: "Your app, almost ready for launch!",
-    exciting: "(ohh, this is exciting!)",
-    letsGo: "Let's go!",
+      "Time to join the laundry revolution. Click a button below to get started.",
+    readyForLaunch: "You're almost ready to launder...",
+    exciting: "(you can finally wear some new socks)",
+    letsGo: "Find Group",
   },
   errorScreen: {
     title: "Something went wrong!",
@@ -35,9 +35,9 @@ const en = {
     enterDetails:
       "Enter your details below to enter laundry collaboration nirvanna.",
     registerDetails: "If you don't have an account, press the Sign Up button quickly. Only so many pairs of undies left...",
-    emailFieldLabel: "Email",
+    emailFieldLabel: "Email/Username",
     passwordFieldLabel: "Password",
-    emailFieldPlaceholder: "Enter your email address",
+    emailFieldPlaceholder: "Enter your email address or username",
     passwordFieldPlaceholder: "Super secret password here",
     tapToSignIn: "Sign In!",
     tapToRegister: "Sign Up!",

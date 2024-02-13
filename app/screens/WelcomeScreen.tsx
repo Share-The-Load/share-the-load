@@ -9,7 +9,7 @@ import { colors, spacing } from "../theme"
 import { useHeader } from "../utils/useHeader"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 
-const welcomeLogo = require("../../assets/images/logo.png")
+const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
 const welcomeFace = require("../../assets/images/welcome-face.png")
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
@@ -20,8 +20,8 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
     authenticationStore: { logout },
   } = useStores()
 
-  function goNext() {
-    navigation.navigate("Demo", { screen: "DemoShowroom", params: {} })
+  function goNext(mode: "find" | "create") {
+    navigation.navigate("Group", { mode })
   }
 
   useHeader(
@@ -45,17 +45,23 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
           preset="heading"
         />
         <Text tx="welcomeScreen.exciting" preset="subheading" />
-        <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
+        {/* TODO: Add a midjourney washing machine image here */}
+        {/* <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" /> */}
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
         <Text tx="welcomeScreen.postscript" size="md" />
-
+        <Button
+          testID="next-screen-button"
+          preset="default"
+          tx="welcomeScreen.letsGo"
+          onPress={() => goNext("find")}
+        />
         <Button
           testID="next-screen-button"
           preset="reversed"
-          tx="welcomeScreen.letsGo"
-          onPress={goNext}
+          text="Create Group"
+          onPress={() => goNext("create")}
         />
       </View>
     </View>

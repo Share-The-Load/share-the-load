@@ -4,31 +4,32 @@ export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
   .props({
     authToken: types.maybe(types.string),
-    authEmail: "",
+    userId: types.maybe(types.integer),
+    userGroup: types.maybe(types.integer),
   })
   .views((store) => ({
     get isAuthenticated() {
-      return false
-      // return !!store.authToken
+      return !!store.authToken
     },
-    get validationError() {
-      if (store.authEmail.length === 0) return "can't be blank"
-      if (store.authEmail.length < 6) return "must be at least 6 characters"
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(store.authEmail))
-        return "must be a valid email address"
-      return ""
-    },
+
+    get hasGroup() {
+      return !!store.userGroup
+    }
   }))
   .actions((store) => ({
     setAuthToken(value?: string) {
       store.authToken = value
     },
-    setAuthEmail(value: string) {
-      store.authEmail = value.replace(/ /g, "")
+    setUserId(value?: number) {
+      store.userId = value
+    },
+    setUserGroup(value?: number) {
+      store.userGroup = value
     },
     logout() {
       store.authToken = undefined
-      store.authEmail = ""
+      store.userId = undefined
+      store.userGroup = undefined
     },
   }))
 

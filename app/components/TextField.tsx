@@ -45,6 +45,8 @@ export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
    * The helper text to display if not using `helperTx`.
    */
   helper?: TextProps["text"]
+
+  secondHelper?: TextProps["text"]
   /**
    * Helper text which is looked up via i18n.
    */
@@ -111,6 +113,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     placeholder,
     placeholderTxOptions,
     helper,
+    secondHelper,
     helperTx,
     helperTxOptions,
     status,
@@ -220,6 +223,15 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
           preset="formHelper"
           text={helper}
           tx={helperTx}
+          txOptions={helperTxOptions}
+          {...HelperTextProps}
+          style={$helperStyles}
+        />
+      )}
+      {secondHelper && (
+        <Text
+          preset="formHelper"
+          text={secondHelper}
           txOptions={helperTxOptions}
           {...HelperTextProps}
           style={$helperStyles}
