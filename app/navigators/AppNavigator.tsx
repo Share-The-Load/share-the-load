@@ -68,11 +68,18 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
+      // Uncomment to see the real navigator
+      // initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
+      //Uncomment to see the demo navigator
+      initialRouteName="Demo"
     >
-      {isAuthenticated && hasGroup ? (
+      {/* Uncomment to see DEMO Navigator */}
+      <Stack.Screen name="Demo" component={DemoNavigator} />
+
+      {
+        //Uncomment to see the real navigator
+        /* {isAuthenticated && hasGroup ? (
         <>
-          {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
           <Stack.Screen name="Home" component={MainNavigator} />
         </>
       ) : isAuthenticated && !hasGroup ? (
@@ -89,7 +96,8 @@ const AppStack = observer(function AppStack() {
 
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
         </>
-      )}
+      )} */
+      }
 
       {/** 🔥 Your screens go here */}
       {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
