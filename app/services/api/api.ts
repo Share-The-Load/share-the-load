@@ -8,8 +8,9 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiFeedResponse } from "./api.types"
+import type { ApiConfig, ApiFeedResponse, ApiGroupsResponse } from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
+import { GroupSnapshotIn } from "app/models"
 
 /**
  * Configuring the apisauce instance.
@@ -39,6 +40,11 @@ export class Api {
         Accept: "application/json",
       },
     })
+  }
+
+  async validateToken(token: string | undefined): Promise<any> {
+    this.apisauce.setHeader('Authorization', `Bearer ${token}`)
+    return this.apisauce.post('/account/validate_token', { token })
   }
 
   /**
@@ -74,6 +80,51 @@ export class Api {
       return { kind: "bad-data" }
     }
   }
+
+  async searchGroupsByName(groupName: string, authToken: string | undefined): Promise<{ kind: "ok"; groups: GroupSnapshotIn[] } | GeneralApiProblem> {
+    // make the api call
+    console.log(`❗️❗️❗️ validating token`,)
+    // const validateToken = await this.validateToken(authToken).catch((err) => {
+    //   console.log(`❗️❗️❗️ Token not valid`, err)
+    //   localStorage.removeItem('token');
+    //   this.apisauce.post('/account/refresh-token', { token }).then((res) => {
+    //     console.log(`❗️❗️❗️ Refreshed TOken`, res)
+    //     localStorage.setItem('token', res.data.token);
+    //     this.apisauce.setHeader('Authorization', `Bearer ${res.data.token}`)
+    //   })
+    // }
+    // console.log(`❗️❗️❗️ validated`, validateToken)
+
+    this.apisauce.setHeader('Authorization', `Bearer ${authToken}`)
+    const response: ApiResponse<ApiGroupsResponse> = await this.apisauce.get(`/groups/${groupName}`)
+
+    console.log(`❗️❗️❗️ response`, response)
+
+    // the typical ways to die when calling an api
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    // transform the data into the format we are expecting
+    try {
+      const rawData = response.data
+
+      // This is where we transform the data into the shape we expect for our MST model.
+      const groups: GroupSnapshotIn[] =
+        rawData?.groups.map((raw) => ({
+          ...raw,
+        })) ?? []
+
+      return { kind: "ok", groups }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return { kind: "bad-data" }
+    }
+  }
+
 }
 
 // Singleton instance of the API for convenience

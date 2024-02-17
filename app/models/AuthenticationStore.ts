@@ -12,6 +12,10 @@ export const AuthenticationStoreModel = types
       return !!store.authToken
     },
 
+    getAuthToken() {
+      return store.authToken
+    },
+
     get hasGroup() {
       return !!store.userGroup
     }
