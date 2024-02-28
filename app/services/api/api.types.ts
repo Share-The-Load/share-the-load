@@ -40,6 +40,10 @@ export interface ApiGroupsResponse {
   groups: GroupSnapshotIn[]
 }
 
+export interface ApiCreateGroupResponse {
+  group: GroupSnapshotIn
+}
+
 /**
  * The options used to configure apisauce.
  */

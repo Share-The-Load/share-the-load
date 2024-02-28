@@ -9,7 +9,7 @@ import { GroupStoreModel } from "./GroupStore"
 export const RootStoreModel = types.model("RootStore").props({
   authenticationStore: types.optional(AuthenticationStoreModel, {}),
   episodeStore: types.optional(EpisodeStoreModel, {}),
-  groupStore: types.optional(GroupStoreModel, {}),
+  groupStore: types.optional(GroupStoreModel, { groups: [], yourGroup: {} }),
 })
 
 /**

@@ -59,7 +59,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
         />
         <Button
           testID="next-screen-button"
-          preset="reversed"
+          preset="primary"
           text="Create Group"
           onPress={() => goNext("create")}
         />

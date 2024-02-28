@@ -7,11 +7,15 @@ import { withSetPropAction } from "./helpers/withSetPropAction"
 export const GroupModel = types
   .model("Group")
   .props({
+    group_id: types.optional(types.integer, 0),
     name: types.optional(types.string, ""),
     passcode: types.optional(types.string, ""),
+    hasPasscode: types.optional(types.boolean, false),
+    numberOfMembers: types.optional(types.integer, 0),
     slogan: types.optional(types.string, ""),
     created_at: types.optional(types.string, ""),
-    // owner:
+    owner_id: types.optional(types.integer, 0),
+    ownerName: types.optional(types.string, ""),
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars

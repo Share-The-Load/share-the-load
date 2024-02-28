@@ -1,6 +1,6 @@
 import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { TextInput, TextStyle, ViewStyle } from "react-native"
+import { Alert, TextInput, TextStyle, ViewStyle } from "react-native"
 import { AppStackScreenProps, goBack } from "app/navigators"
 import { Icon, Screen, Text, TextField, Button } from "app/components"
 import { colors, spacing } from "app/theme"
@@ -32,7 +32,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
   const usernameError = isSubmitted ? registerUsernameValidationError() : ""
 
   const {
-    authenticationStore: { setAuthToken, setUserId },
+    authenticationStore: { setAuthToken, setRefreshToken, distributeAuthToken, setUserId },
   } = useStores()
 
   useEffect(() => {
@@ -87,7 +87,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
     checkUsername()
       .then((res) => {
         if (!res.data.isAvailable) {
-          console.log(`❗️❗️❗️ res`, res)
           setIsUsernameTaken(true)
           throw new Error("Username is not available")
         } else {
@@ -98,22 +97,22 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
               password: registerPassword,
             })
             .then((res) => {
-              console.log(`❗️❗️❗️ res`, res.data.user)
               setIsSubmitted(false)
               setRegisterPassword("")
               setRegisterUsername("")
               setRegisterEmail("")
               setAuthToken(res.data.user.token)
+              setRefreshToken(res.data.user.refreshToken)
               setUserId(res.data.user.userId)
+              distributeAuthToken()
             })
             .catch((err) => {
-              console.log(`❗️❗️❗️ err`, err)
+              Alert.alert("Error", "An error occurred while registering")
             })
         }
       })
       .catch((err) => {
-        console.log(`❗️❗️❗️ err`, err)
-        // usernameError = "Username is not available"
+        Alert.alert("Error", "An error occurred while checking username availability")
       })
   }
 
@@ -182,7 +181,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
         testID="login-button"
         text="Register"
         style={$tapButton}
-        preset="reversed"
+        preset="primary"
         onPress={register}
       />
     </Screen>
