@@ -69,34 +69,34 @@ const AppStack = observer(function AppStack() {
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
       // Uncomment to see the real navigator
-      // initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
+      initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
       //Uncomment to see the demo navigator
-      initialRouteName="Demo"
+      // initialRouteName="Demo"
     >
       {/* Uncomment to see DEMO Navigator */}
-      <Stack.Screen name="Demo" component={DemoNavigator} />
+      {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
 
       {
         //Uncomment to see the real navigator
-        /* {isAuthenticated && hasGroup ? (
-        <>
-          <Stack.Screen name="Home" component={MainNavigator} />
-        </>
-      ) : isAuthenticated && !hasGroup ? (
-        <>
-          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+        isAuthenticated && hasGroup ? (
+          <>
+            <Stack.Screen name="Home" component={MainNavigator} />
+          </>
+        ) : isAuthenticated && !hasGroup ? (
+          <>
+            <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-          <Stack.Screen name="Group" component={Screens.GroupScreen} />
+            <Stack.Screen name="Group" component={Screens.GroupScreen} />
 
-          <Stack.Screen name="Home" component={Screens.HomeScreen} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="Login" component={Screens.LoginScreen} />
+            <Stack.Screen name="Home" component={Screens.HomeScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={Screens.LoginScreen} />
 
-          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-        </>
-      )} */
+            <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+          </>
+        )
       }
 
       {/** 🔥 Your screens go here */}

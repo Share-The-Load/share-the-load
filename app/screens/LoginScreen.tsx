@@ -1,11 +1,13 @@
 import { observer } from "mobx-react-lite"
 import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
-import { TextInput, TextStyle, ViewStyle } from "react-native"
+
+import { ImageStyle, TextInput, TextStyle, ViewStyle, Image, ActivityIndicator } from "react-native"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import axios from "app/utils/axios"
+const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
@@ -16,12 +18,19 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   const [authEmailUsername, setAuthEmailUsername] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
   const [loginError, setLoginError] = useState("")
   const { navigation } = _props
 
   const {
-    authenticationStore: { setAuthToken, setUserGroup, setUserId },
+    authenticationStore: {
+      setAuthToken,
+      setRefreshToken,
+      distributeAuthToken,
+      setUserGroupId,
+      setUserId,
+    },
   } = useStores()
 
   useEffect(() => {
@@ -38,9 +47,14 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   }, [])
 
   const error = isSubmitted ? usernameEmailValidationError() : ""
+  const errorPassword = isSubmitted ? passwordValidationError() : ""
 
   function usernameEmailValidationError() {
     if (authEmailUsername.length === 0) return "can't be blank"
+    return ""
+  }
+  function passwordValidationError() {
+    if (authPassword.length === 0) return "can't be blank"
     return ""
   }
 
@@ -48,23 +62,28 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
 
-    if (usernameEmailValidationError()) return
+    if (usernameEmailValidationError() != "" || passwordValidationError() != "") return
+    setIsLoading(true)
 
     axios
       .post("/account/login", { username: authEmailUsername, password: authPassword })
       .then((res) => {
-        // console.log(`❗️❗️❗️ res`, res.data.user)
         setIsSubmitted(false)
         setAuthPassword("")
         setAuthEmailUsername("")
         //if the user has registered but hasn't joined a group yet
-        if (res.data.user.groupId !== null) setUserGroup(res.data.user.groupId)
+        if (res.data.user.groupId !== null) setUserGroupId(res.data.user.groupId)
         setAuthToken(res.data.user.token)
+        setRefreshToken(res.data.user.refreshToken)
+        distributeAuthToken()
         setUserId(res.data.user.userId)
+        setIsLoading(false)
       })
       .catch((err) => {
-        console.log(`❗️❗️❗️ err`, err)
-        setLoginError(err)
+        if (err.includes("Share the Load is not available")) {
+          setLoginError(err)
+        } else setLoginError("Invalid username or password")
+        setIsLoading(false)
       })
   }
 
@@ -94,9 +113,12 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       contentContainerStyle={$screenContentContainer}
       safeAreaEdges={["top", "bottom"]}
     >
+      <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
+
       <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
       <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
       <Text tx="loginScreen.registerDetails" preset="subheading" style={$registerDetails} />
+      <ActivityIndicator animating={isLoading} />
 
       <TextField
         value={authEmailUsername}
@@ -124,6 +146,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         secureTextEntry={isAuthPasswordHidden}
         labelTx="loginScreen.passwordFieldLabel"
         placeholderTx="loginScreen.passwordFieldPlaceholder"
+        helper={errorPassword}
+        status={errorPassword ? "error" : undefined}
         onSubmitEditing={login}
         RightAccessory={PasswordRightAccessory}
       />
@@ -134,14 +158,14 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         testID="login-button"
         tx="loginScreen.tapToSignIn"
         style={$tapButton}
-        preset="reversed"
+        preset="default"
         onPress={login}
       />
       <Button
         testID="register-button"
         tx="loginScreen.tapToRegister"
         style={$registerButton}
-        preset="reversed"
+        preset="primary"
         onPress={register}
       />
     </Screen>
@@ -149,7 +173,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 })
 
 const $screenContentContainer: ViewStyle = {
-  paddingVertical: spacing.xxl,
+  paddingVertical: spacing.lg,
   paddingHorizontal: spacing.lg,
 }
 
@@ -181,5 +205,10 @@ const $tapButton: ViewStyle = {
 
 const $registerButton: ViewStyle = {
   marginTop: spacing.xs,
-  backgroundColor: colors.palette.accent500,
+}
+
+const $welcomeLogo: ImageStyle = {
+  height: 88,
+  width: "100%",
+  marginBottom: spacing.xl,
 }

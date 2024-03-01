@@ -41,7 +41,7 @@ export function MainNavigator() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ focused }) => (
-            <Icon icon="community" color={focused ? colors.tint : undefined} size={30} />
+            <Icon icon="home" color={focused ? colors.tint : undefined} size={30} />
           ),
         }}
       />
