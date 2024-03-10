@@ -84,13 +84,10 @@ export const GroupItem = observer(function GroupItem(props: GroupItemProps) {
 })
 
 const $textContainer: ViewStyle = {
-  // flexDirection: "row",
   justifyContent: "center",
   alignItems: "flex-start",
   alignSelf: "center",
   flexGrow: 1,
-
-  // flexShrink: 1,
 }
 
 const $separatorTop: ViewStyle = {

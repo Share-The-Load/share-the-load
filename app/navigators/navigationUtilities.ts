@@ -173,6 +173,11 @@ export function goBack() {
   if (navigationRef.isReady() && navigationRef.canGoBack()) {
     navigationRef.goBack()
   }
+  else if (navigationRef.isReady()) {
+    // TODO: this might not be right
+    resetRoot()
+    navigate("Main")
+  }
 }
 
 /**

@@ -36,6 +36,11 @@ export interface ApiFeedResponse {
   items: EpisodeItem[]
 }
 
+export interface ApiGenericResponse {
+  status: string
+  message: string
+}
+
 export interface ApiGroupsResponse {
   groups: GroupSnapshotIn[]
 }
