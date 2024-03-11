@@ -1,5 +1,6 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { Titles } from "app/constants/titles"
 
 /**
  * Model description here for TypeScript hints.
@@ -17,7 +18,14 @@ export const GroupMemberModel = types
     loads: types.optional(types.integer, 0),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get profileTitle() {
+      if (self?.loads < 1) return Titles[0].title
+      return Titles.reverse().find((title) =>
+        self?.loads ? self.loads >= title.loads : false,
+      )?.title
+    }
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface GroupMember extends Instance<typeof GroupMemberModel> { }

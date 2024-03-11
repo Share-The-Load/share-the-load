@@ -14,6 +14,7 @@ export const GroupModel = types
     hasPasscode: types.optional(types.boolean, false),
     numberOfMembers: types.optional(types.integer, 0),
     slogan: types.optional(types.string, ""),
+    totalLoads: types.optional(types.integer, 0),
     created_at: types.optional(types.string, ""),
     owner_id: types.optional(types.integer, 0),
     ownerName: types.optional(types.string, ""),

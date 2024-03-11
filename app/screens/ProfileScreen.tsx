@@ -57,7 +57,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
-      <Text style={$title} preset="heading" text="Profile" />
+      {/* <Text style={$title} preset="heading" text="Profile" /> */}
 
       <ActivityIndicator animating={isLoading} size="large" color={colors.palette.accent700} />
 
@@ -70,19 +70,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <Text style={$titleStyle} text={profile?.username} />
           <Text style={$subheaderStyle} text={profile?.email} />
           <Text style={$subheaderStyle} text={`${profile?.loads} loads shared`} />
-          <Text
-            style={$subheaderStyle}
-            text={
-              Titles.reverse().find((title) =>
-                profile?.loads ? profile.loads >= title.loads : false,
-              )?.title
-            }
-          />
+          <Text style={$subheaderStyle} text={profile?.profileTitle} />
           <Text style={$subheaderStyle} text={`Sharing Loads for ${profile?.memberSince}`} />
         </View>
       </View>
 
-      <Text style={$subheaderStyle} text="Preferences" />
+      <Text preset="subheading" style={$subheaderStyle} text="Preferences" />
 
       <ListItemNoClick
         text="Load Time"
