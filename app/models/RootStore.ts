@@ -1,7 +1,6 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { UserStoreModel } from "./UserStore"
 import { AuthenticationStoreModel } from "./AuthenticationStore"
-import { EpisodeStoreModel } from "./EpisodeStore"
 import { GroupStoreModel } from "./GroupStore"
 
 /**
@@ -10,7 +9,6 @@ import { GroupStoreModel } from "./GroupStore"
 export const RootStoreModel = types.model("RootStore").props({
   userStore: types.optional(UserStoreModel, {} as any),
   authenticationStore: types.optional(AuthenticationStoreModel, {}),
-  episodeStore: types.optional(EpisodeStoreModel, {}),
   groupStore: types.optional(GroupStoreModel, { groups: [], yourGroup: {} }),
 })
 

@@ -41,14 +41,11 @@ const config = {
       path: "",
     },
     Welcome: "welcome",
-    Demo: {
+    Main: {
       screens: {
-        DemoShowroom: {
-          path: "showroom/:queryIndex?/:itemIndex?",
-        },
-        DemoDebug: "debug",
-        DemoPodcastList: "podcast",
-        DemoCommunity: "community",
+        Home: "home",
+        Profile: "profile",
+        GroupHome: "group-home",
       },
     },
   },

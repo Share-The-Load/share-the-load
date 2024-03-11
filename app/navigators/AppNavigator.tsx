@@ -17,7 +17,6 @@ import { useColorScheme } from "react-native"
 import * as Screens from "app/screens"
 import Config from "../config"
 import { useStores } from "../models"
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { colors } from "app/theme"
 import { MainNavigator, MainNavigatorParamList } from "./MainNavigator"
@@ -40,12 +39,11 @@ export type AppStackParamList = {
   Login: undefined
   Main: NavigatorScreenParams<MainNavigatorParamList>
   Group: { mode: "find" | "create" }
-  Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
   Register: undefined
   Profile: undefined
   GroupHome: undefined
-	// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
 /**
@@ -70,39 +68,28 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      // Uncomment to see the real navigator
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
-      //Uncomment to see the demo navigator
-      // initialRouteName="Demo"
     >
-      {/* Uncomment to see DEMO Navigator */}
-      {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
+      {isAuthenticated && hasGroup ? (
+        <>
+          <Stack.Screen name="Main" component={MainNavigator} />
+        </>
+      ) : isAuthenticated && !hasGroup ? (
+        <>
+          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-      {
-        //Uncomment to see the real navigator
-        isAuthenticated && hasGroup ? (
-          <>
-            <Stack.Screen name="Main" component={MainNavigator} />
-          </>
-        ) : isAuthenticated && !hasGroup ? (
-          <>
-            <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+          <Stack.Screen name="Group" component={Screens.GroupScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={Screens.LoginScreen} />
 
-            <Stack.Screen name="Group" component={Screens.GroupScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={Screens.LoginScreen} />
+          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+        </>
+      )}
 
-            <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-          </>
-        )
-      }
-
-      {/** 🔥 Your screens go here */}
       <Stack.Screen name="Profile" component={Screens.ProfileScreen} />
       <Stack.Screen name="GroupHome" component={Screens.GroupHomeScreen} />
-			{/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
     </Stack.Navigator>
   )
 })
