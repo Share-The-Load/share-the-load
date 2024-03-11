@@ -36,6 +36,14 @@ export const GroupStoreModel = types
       } else {
         throw new Error(`Error joining group: ${JSON.stringify(response)}`)
       }
+    },
+    async getGroupDetails(groupId: number | undefined) {
+      const response = await api.getGroupDetails(groupId)
+      if (response.kind === "ok") {
+        store.setProp("yourGroup", response.group)
+      } else {
+        throw new Error(`Error getting group details: ${JSON.stringify(response)}`)
+      }
     }
   }))
   .views((store) => ({
@@ -44,6 +52,12 @@ export const GroupStoreModel = types
     },
     get groupsSearchResults() {
       return store.groups
+    },
+    get yourGroupDetails() {
+      return store.yourGroup
+    },
+    get yourGroupId() {
+      return store.yourGroup?.group_id
     }
   }))
   .actions((store) => ({

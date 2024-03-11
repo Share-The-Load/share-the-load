@@ -1,5 +1,6 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
+import { GroupMemberModel } from "./GroupMember"
 
 /**
  * Model description here for TypeScript hints.
@@ -16,6 +17,8 @@ export const GroupModel = types
     created_at: types.optional(types.string, ""),
     owner_id: types.optional(types.integer, 0),
     ownerName: types.optional(types.string, ""),
+    avatar_id: types.maybe(types.integer),
+    members: types.optional(types.array(GroupMemberModel), []),
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars

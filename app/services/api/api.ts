@@ -8,7 +8,7 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiCreateGroupResponse, ApiFeedResponse, ApiGenericResponse, ApiGroupsResponse } from "./api.types"
+import type { ApiConfig, ApiGroupResponse, ApiFeedResponse, ApiGenericResponse, ApiGroupsResponse } from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
 import { GroupSnapshotIn, UserSnapshotIn } from "app/models"
 
@@ -121,7 +121,7 @@ export class Api {
   }
 
   async createGroup(groupName: string, passcode: string): Promise<{ kind: "ok"; group: GroupSnapshotIn | undefined } | GeneralApiProblem> {
-    const response: ApiResponse<ApiCreateGroupResponse> = await this.apisauce.post(`/create-group`, { name: groupName, passcode })
+    const response: ApiResponse<ApiGroupResponse> = await this.apisauce.post(`/create-group`, { name: groupName, passcode })
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
@@ -131,7 +131,7 @@ export class Api {
   }
 
   async joinGroup(groupId: number, passcode: string): Promise<{ kind: "ok"; group: GroupSnapshotIn | undefined } | GeneralApiProblem> {
-    const response: ApiResponse<ApiCreateGroupResponse> = await this.apisauce.post(`/join-group`, { groupId, passcode })
+    const response: ApiResponse<ApiGroupResponse> = await this.apisauce.post(`/join-group`, { groupId, passcode })
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
@@ -167,6 +167,16 @@ export class Api {
       if (problem) return problem
     }
     return { kind: "ok" };
+  }
+
+  async getGroupDetails(groupId: number | undefined): Promise<{ kind: "ok"; group: GroupSnapshotIn | undefined } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGroupResponse> = await this.apisauce.get(`/group-details/${groupId}`)
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    return { kind: "ok", group: response.data?.group }
   }
 }
 // Singleton instance of the API for convenience
