@@ -4,12 +4,7 @@
  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
  * and a "main" flow which the user will use once logged in.
  */
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-  NavigatorScreenParams,
-} from "@react-navigation/native"
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -17,7 +12,6 @@ import { useColorScheme } from "react-native"
 import * as Screens from "app/screens"
 import Config from "../config"
 import { useStores } from "../models"
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { colors } from "app/theme"
 import { MainNavigator } from "./MainNavigator"
@@ -40,7 +34,6 @@ export type AppStackParamList = {
   Login: undefined
   Home: undefined
   Group: { mode: "find" | "create" }
-  Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
   Register: undefined
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
@@ -68,36 +61,27 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      // Uncomment to see the real navigator
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
-      //Uncomment to see the demo navigator
-      // initialRouteName="Demo"
     >
-      {/* Uncomment to see DEMO Navigator */}
-      {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
+      {isAuthenticated && hasGroup ? (
+        <>
+          <Stack.Screen name="Home" component={MainNavigator} />
+        </>
+      ) : isAuthenticated && !hasGroup ? (
+        <>
+          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-      {
-        //Uncomment to see the real navigator
-        isAuthenticated && hasGroup ? (
-          <>
-            <Stack.Screen name="Home" component={MainNavigator} />
-          </>
-        ) : isAuthenticated && !hasGroup ? (
-          <>
-            <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+          <Stack.Screen name="Group" component={Screens.GroupScreen} />
 
-            <Stack.Screen name="Group" component={Screens.GroupScreen} />
+          <Stack.Screen name="Home" component={Screens.HomeScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={Screens.LoginScreen} />
 
-            <Stack.Screen name="Home" component={Screens.HomeScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={Screens.LoginScreen} />
-
-            <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-          </>
-        )
-      }
+          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+        </>
+      )}
 
       {/** 🔥 Your screens go here */}
       {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
