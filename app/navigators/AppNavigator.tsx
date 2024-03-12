@@ -43,7 +43,8 @@ export type AppStackParamList = {
   Register: undefined
   Profile: undefined
   GroupHome: undefined
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+
+	// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
 /**

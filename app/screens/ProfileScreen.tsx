@@ -5,6 +5,7 @@ import { AppStackScreenProps } from "app/navigators"
 import { Button, ListItem, Screen, Text } from "app/components"
 import { colors, spacing } from "app/theme"
 import { useStores } from "app/models"
+
 import RNPickerSelect from "react-native-picker-select"
 import RNDateTimePicker from "@react-native-community/datetimepicker"
 import { set } from "date-fns"
@@ -70,11 +71,13 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <Text style={$subheaderStyle} text={profile?.email} />
           <Text style={$subheaderStyle} text={`${profile?.loads} loads shared`} />
           <Text style={$subheaderStyle} text={profile?.profileTitle} />
+
           <Text style={$subheaderStyle} text={`Sharing Loads for ${profile?.memberSince}`} />
         </View>
       </View>
 
       <Text preset="subheading" style={$subheaderStyle} text="Preferences" />
+
 
       <ListItemNoClick
         text="Load Time"

@@ -5,6 +5,7 @@ import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
 import type { ApiConfig, ApiGroupResponse, ApiGenericResponse, ApiGroupsResponse, ApiFetchNewSloganResponse } from "./api.types"
 import { GroupSnapshotIn, UserSnapshotIn } from "app/models"
 
+
 /**
  * Configuring the apisauce instance.
  */
@@ -158,6 +159,7 @@ export class Api {
     }
     return { kind: "ok", slogan: response.data?.slogan }
   }
+
 }
 // Singleton instance of the API for convenience
 export const api = new Api()
