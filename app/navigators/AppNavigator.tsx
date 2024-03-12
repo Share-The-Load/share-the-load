@@ -14,7 +14,7 @@ import Config from "../config"
 import { useStores } from "../models"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { colors } from "app/theme"
-import { MainNavigator } from "./MainNavigator"
+import { MainNavigator, MainNavigatorParamList } from "./MainNavigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -32,11 +32,13 @@ import { MainNavigator } from "./MainNavigator"
 export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
-  Home: undefined
+  Main: NavigatorScreenParams<MainNavigatorParamList>
   Group: { mode: "find" | "create" }
   // 🔥 Your screens go here
   Register: undefined
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  Profile: undefined
+  GroupHome: undefined
+	// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
 /**
@@ -64,27 +66,28 @@ const AppStack = observer(function AppStack() {
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
     >
       {isAuthenticated && hasGroup ? (
-        <>
-          <Stack.Screen name="Home" component={MainNavigator} />
-        </>
-      ) : isAuthenticated && !hasGroup ? (
-        <>
-          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+          <>
+            <Stack.Screen name="Main" component={MainNavigator} />
+          </>
+        ) : isAuthenticated && !hasGroup ? (
+          <>
+            <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-          <Stack.Screen name="Group" component={Screens.GroupScreen} />
+            <Stack.Screen name="Group" component={Screens.GroupScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={Screens.LoginScreen} />
 
-          <Stack.Screen name="Home" component={Screens.HomeScreen} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="Login" component={Screens.LoginScreen} />
-
-          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-        </>
-      )}
+            <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+          </>
+        )
+      }
 
       {/** 🔥 Your screens go here */}
-      {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
+      <Stack.Screen name="Profile" component={Screens.ProfileScreen} />
+      <Stack.Screen name="GroupHome" component={Screens.GroupHomeScreen} />
+			{/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
     </Stack.Navigator>
   )
 })

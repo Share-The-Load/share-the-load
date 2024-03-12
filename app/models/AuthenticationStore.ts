@@ -35,29 +35,26 @@ export const AuthenticationStoreModel = types
       api.apisauce.setHeader("Authorization", `Bearer ${token}`);
     },
     async validateAndRefreshToken() {
-      //TODO: This is not done
-      console.log(`❗️❗️❗️ AUUTH`, store.authToken)
-      const response = await api.validateToken(store.authToken).catch((error) => {
+      if (!store.authToken) {
+        return
+      }
+      console.log(`❗️❗️❗️ Checking Auth Token`, store.authToken)
+      await api.validateToken(store.authToken).catch(async (error) => {
         console.error(`Error validating token: ${error}`)
-        // const refreshToken = api.refreshToken(token).catch((error: any) => {
-        //   console.error(`Error refreshing token: ${error}`)
-        // }).then((response: string) => {
-        //   console.log(`❗️❗️❗️ response`, response)
-        //   // store.authToken(response.token)
+        console.log(`❗️❗️❗️ REFRESH TOKEN`, store.refreshToken)
+        await api.refreshToken(store.refreshToken).catch((error: any) => {
+          console.error(`Error refreshing token: ${error}`)
+          this.logout()
+        }).then((response: any) => {
+          console.log(`❗️❗️❗️ response REFRESH`, response)
+          this.setAuthToken(response.token)
+          this.setRefreshToken(response.refreshToken)
+          this.distributeAuthToken()
+        })
         // })
       }).then((response: any) => {
-        if (response.status === 403) {
-          //I think this means they are expired and need to login again
-          console.log(`❗️❗️❗️ hser`,)
-          const refreshToken = api.refreshToken(store.authToken).catch((error: any) => {
-            console.error(`Error refreshing token: ${error}`)
-          }).then((response: any) => {
-            console.log(`❗️❗️❗️ response REFRESH`, response)
-            // this.setAuthToken(response.token)
-            // this.distributeAuthToken()
-          })
-        }
-        console.log(`❗️❗️❗️ response VALIDATE`, response)
+        api.apisauce.setHeader("Authorization", `Bearer ${store.authToken}`);
+        console.log(`❗️❗️❗️ TOKEN HAS BEEN VALIDATED. WE"RE GOOD`, response)
       })
     },
     logout() {

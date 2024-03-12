@@ -1,5 +1,10 @@
 import { GroupSnapshotIn } from "app/models"
 
+export interface ApiGenericResponse {
+  status: string
+  message: string
+}
+
 export interface ApiGroupsResponse {
   groups: GroupSnapshotIn[]
 }
