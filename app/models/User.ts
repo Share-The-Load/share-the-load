@@ -22,6 +22,7 @@ export const UserModel = types
   .actions(withSetPropAction)
   .views((self) => ({
     get profileTitle() {
+      if (self?.loads < 1) return "No Load Joe"
       return Titles.reverse().find((title) =>
         self?.loads ? self.loads >= title.loads : false,
       )?.title

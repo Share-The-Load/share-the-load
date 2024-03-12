@@ -13,6 +13,10 @@ export interface ApiGenericResponse {
   message: string
 }
 
+export interface ApiFetchNewSloganResponse {
+  slogan: string
+}
+
 /**
  * The options used to configure apisauce.
  */

@@ -44,6 +44,30 @@ export const GroupStoreModel = types
       } else {
         throw new Error(`Error getting group details: ${JSON.stringify(response)}`)
       }
+    },
+    async leaveGroup() {
+      const response = await api.leaveGroup()
+      if (response.kind === "ok") {
+        store.setProp("yourGroup", null)
+      } else {
+        throw new Error(`Error leaving group: ${JSON.stringify(response)}`)
+      }
+    },
+    async removeMember(memberId: number) {
+      const response = await api.removeMember(memberId)
+      if (response.kind === "ok") {
+        store.yourGroup?.removeMember(memberId)
+      } else {
+        throw new Error(`Error removing member: ${JSON.stringify(response)}`)
+      }
+    },
+    async fetchNewSlogan() {
+      const response = await api.fetchNewSlogan()
+      if (response.kind === "ok") {
+        return response.slogan
+      } else {
+        throw new Error(`Error fetching new slogan: ${JSON.stringify(response)}`)
+      }
     }
   }))
   .views((store) => ({
@@ -58,7 +82,7 @@ export const GroupStoreModel = types
     },
     get yourGroupId() {
       return store.yourGroup?.group_id
-    }
+    },
   }))
   .actions((store) => ({
   }))

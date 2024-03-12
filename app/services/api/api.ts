@@ -2,7 +2,7 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiGroupResponse, ApiGenericResponse, ApiGroupsResponse } from "./api.types"
+import type { ApiConfig, ApiGroupResponse, ApiGenericResponse, ApiGroupsResponse, ApiFetchNewSloganResponse } from "./api.types"
 import { GroupSnapshotIn, UserSnapshotIn } from "app/models"
 
 /**
@@ -131,6 +131,32 @@ export class Api {
     }
 
     return { kind: "ok", group: response.data?.group }
+  }
+
+  async leaveGroup(): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/leave-group`)
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+
+  async removeMember(memberId: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/remove-member`, { memberId })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+  async fetchNewSlogan(): Promise<{ kind: "ok", slogan: string | undefined } | GeneralApiProblem> {
+    const response: ApiResponse<ApiFetchNewSloganResponse> = await this.apisauce.get(`/get-slogan`)
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok", slogan: response.data?.slogan }
   }
 }
 // Singleton instance of the API for convenience

@@ -22,8 +22,15 @@ export const GroupModel = types
     members: types.optional(types.array(GroupMemberModel), []),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => ({
+    removeMember(memberId: number) {
+      const newMembers = self.members.filter((member) => member.user_id !== memberId);
+      self.members.replace(newMembers);
+    }
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface Group extends Instance<typeof GroupModel> { }
 export interface GroupSnapshotOut extends SnapshotOut<typeof GroupModel> { }

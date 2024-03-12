@@ -20,7 +20,7 @@ export const GroupMemberModel = types
   .actions(withSetPropAction)
   .views((self) => ({
     get profileTitle() {
-      if (self?.loads < 1) return Titles[0].title
+      if (self?.loads === 0) return "No Load Joe"
       return Titles.reverse().find((title) =>
         self?.loads ? self.loads >= title.loads : false,
       )?.title
