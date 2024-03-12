@@ -1,6 +1,7 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { PreferenceModel } from "./Preference"
+import { Titles } from "app/constants/titles"
 
 /**
  * Model description here for TypeScript hints.
@@ -19,7 +20,14 @@ export const UserModel = types
     preferences: types.optional(types.array(PreferenceModel), []),
   })
   .actions(withSetPropAction)
-  .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .views((self) => ({
+    get profileTitle() {
+      if (self?.loads < 1) return "No Load Joe"
+      return Titles.reverse().find((title) =>
+        self?.loads ? self.loads >= title.loads : false,
+      )?.title
+    }
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
   .actions((self) => ({
     updateLoadTime(value?: number) {
       if (value !== undefined) {

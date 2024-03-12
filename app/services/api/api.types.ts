@@ -9,8 +9,17 @@ export interface ApiGroupsResponse {
   groups: GroupSnapshotIn[]
 }
 
-export interface ApiCreateGroupResponse {
+export interface ApiGroupResponse {
   group: GroupSnapshotIn
+}
+
+export interface ApiGenericResponse {
+  status: string
+  message: string
+}
+
+export interface ApiFetchNewSloganResponse {
+  slogan: string
 }
 
 /**

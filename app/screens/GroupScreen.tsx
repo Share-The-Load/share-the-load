@@ -36,11 +36,15 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
 
   const [isLoading, setIsLoading] = React.useState(false)
 
-  async function search() {
+  function search() {
     setIsLoading(true)
-    await groupStore.searchGroupsByName(searchGroupName)
-    setIsLoading(false)
-    setHasSearched(true)
+    groupStore
+      .searchGroupsByName(searchGroupName)
+      .catch((e) => console.log(e))
+      .finally(() => {
+        setIsLoading(false)
+        setHasSearched(true)
+      })
   }
 
   function createGroup() {
@@ -162,6 +166,7 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
             <>
               {groupStore.groups.map((group) => (
                 <GroupItem
+                  key={group.group_id}
                   text={group?.name}
                   bottomSeparator={true}
                   hasPasscode={group?.hasPasscode}

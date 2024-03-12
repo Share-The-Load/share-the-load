@@ -6,3 +6,5 @@ export * from "./Group"
 export * from "./User"
 export * from "./UserStore"
 export * from "./Preference"
+export * from "./GroupMember"
+

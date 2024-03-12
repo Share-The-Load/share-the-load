@@ -201,6 +201,18 @@ const $viewPresets = {
     $baseViewStyle,
     { backgroundColor: colors.palette.secondary300 },
   ] as StyleProp<ViewStyle>,
+
+  small: {
+    minHeight: 25,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: spacing.xs,
+    overflow: "hidden",
+    backgroundColor: colors.palette.secondary300,
+  } as StyleProp<ViewStyle>,
 }
 
 const $textPresets: Record<Presets, StyleProp<TextStyle>> = {
@@ -209,6 +221,18 @@ const $textPresets: Record<Presets, StyleProp<TextStyle>> = {
   reversed: [$baseTextStyle, { color: colors.palette.neutral100 }],
   primary: [$baseTextStyle, { color: colors.palette.neutral100 }],
   secondary: [$baseTextStyle, { color: colors.palette.neutral100 }],
+  small: [
+    {
+      fontSize: 16,
+      lineHeight: 20,
+      fontFamily: typography.primary.medium,
+      textAlign: "center",
+      flexShrink: 1,
+      flexGrow: 0,
+      zIndex: 2,
+      color: colors.palette.neutral100,
+    },
+  ],
 }
 
 const $pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {
@@ -217,6 +241,7 @@ const $pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {
   reversed: { backgroundColor: colors.palette.neutral700 },
   primary: { backgroundColor: colors.palette.neutral400 },
   secondary: { backgroundColor: colors.palette.neutral400 },
+  small: { backgroundColor: colors.palette.neutral400 },
 }
 
 const $pressedTextPresets: Record<Presets, StyleProp<TextStyle>> = {
@@ -225,4 +250,5 @@ const $pressedTextPresets: Record<Presets, StyleProp<TextStyle>> = {
   reversed: { opacity: 0.9 },
   primary: { opacity: 0.9 },
   secondary: { opacity: 0.9 },
+  small: { opacity: 0.9 },
 }

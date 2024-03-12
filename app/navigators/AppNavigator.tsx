@@ -4,7 +4,12 @@
  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
  * and a "main" flow which the user will use once logged in.
  */
-import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native"
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  NavigatorScreenParams,
+} from "@react-navigation/native"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -38,6 +43,7 @@ export type AppStackParamList = {
   Register: undefined
   Profile: undefined
   GroupHome: undefined
+
 	// IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
 
@@ -66,28 +72,25 @@ const AppStack = observer(function AppStack() {
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
     >
       {isAuthenticated && hasGroup ? (
-          <>
-            <Stack.Screen name="Main" component={MainNavigator} />
-          </>
-        ) : isAuthenticated && !hasGroup ? (
-          <>
-            <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
+        <>
+          <Stack.Screen name="Main" component={MainNavigator} />
+        </>
+      ) : isAuthenticated && !hasGroup ? (
+        <>
+          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 
-            <Stack.Screen name="Group" component={Screens.GroupScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={Screens.LoginScreen} />
+          <Stack.Screen name="Group" component={Screens.GroupScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={Screens.LoginScreen} />
 
-            <Stack.Screen name="Register" component={Screens.RegisterScreen} />
-          </>
-        )
-      }
+          <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+        </>
+      )}
 
-      {/** 🔥 Your screens go here */}
       <Stack.Screen name="Profile" component={Screens.ProfileScreen} />
       <Stack.Screen name="GroupHome" component={Screens.GroupHomeScreen} />
-			{/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
     </Stack.Navigator>
   )
 })
