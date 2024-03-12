@@ -4,12 +4,7 @@
  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
  * and a "main" flow which the user will use once logged in.
  */
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-  NavigatorScreenParams,
-} from "@react-navigation/native"
+import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -17,7 +12,6 @@ import { useColorScheme } from "react-native"
 import * as Screens from "app/screens"
 import Config from "../config"
 import { useStores } from "../models"
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { colors } from "app/theme"
 import { MainNavigator, MainNavigatorParamList } from "./MainNavigator"
@@ -40,7 +34,6 @@ export type AppStackParamList = {
   Login: undefined
   Main: NavigatorScreenParams<MainNavigatorParamList>
   Group: { mode: "find" | "create" }
-  Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
   Register: undefined
   Profile: undefined
@@ -70,17 +63,9 @@ const AppStack = observer(function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      // Uncomment to see the real navigator
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
-      //Uncomment to see the demo navigator
-      // initialRouteName="Demo"
     >
-      {/* Uncomment to see DEMO Navigator */}
-      {/* <Stack.Screen name="Demo" component={DemoNavigator} /> */}
-
-      {
-        //Uncomment to see the real navigator
-        isAuthenticated && hasGroup ? (
+      {isAuthenticated && hasGroup ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
           </>
