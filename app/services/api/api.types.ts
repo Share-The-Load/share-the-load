@@ -1,4 +1,4 @@
-import { GroupSnapshotIn } from "app/models"
+import { GroupSnapshotIn, LoadSnapshotIn } from "app/models"
 
 export interface ApiGenericResponse {
   status: string
@@ -16,6 +16,14 @@ export interface ApiGroupResponse {
 export interface ApiGenericResponse {
   status: string
   message: string
+}
+
+export interface ApiLoadsResponse {
+  days: [
+    day: string,
+    loads: LoadSnapshotIn[]
+  ]
+
 }
 
 export interface ApiFetchNewSloganResponse {

@@ -164,7 +164,7 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
           <ActivityIndicator animating={isLoading} />
           {groupStore.hasGroups ? (
             <>
-              {groupStore.groups.map((group) => (
+              {groupStore.searchedGroups.map((group) => (
                 <GroupItem
                   key={group.group_id}
                   text={group?.name}

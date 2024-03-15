@@ -6,7 +6,7 @@ import { GroupModel } from "./Group"
 export const GroupStoreModel = types
   .model("GroupStore")
   .props({
-    groups: types.array(GroupModel),
+    searchedGroups: types.array(GroupModel),
     yourGroup: types.maybeNull(GroupModel),
   })
   .actions(withSetPropAction)
@@ -14,9 +14,9 @@ export const GroupStoreModel = types
     async searchGroupsByName(username: string) {
       const response = await api.searchGroupsByName(username)
       if (response.kind === "ok") {
-        store.setProp("groups", response.groups)
+        store.setProp("searchedGroups", response.groups)
       } else {
-        store.setProp("groups", [])
+        store.setProp("searchedGroups", [])
         console.error(`Error fetching groups: ${JSON.stringify(response)}`)
       }
     },
@@ -68,14 +68,23 @@ export const GroupStoreModel = types
       } else {
         throw new Error(`Error fetching new slogan: ${JSON.stringify(response)}`)
       }
+    },
+    async getLoads() {
+      const response = await api.getLoadsHome()
+      if (response.kind === "ok" && response.days) {
+        store.yourGroup?.addDays(response.days)
+      }
+      else {
+        throw new Error(`Error fetching loads: ${JSON.stringify(response)}`)
+      }
     }
   }))
   .views((store) => ({
     get hasGroups() {
-      return store.groups.length > 0
+      return store.searchedGroups.length > 0
     },
     get groupsSearchResults() {
-      return store.groups
+      return store.searchedGroups
     },
     get yourGroupDetails() {
       return store.yourGroup
@@ -83,6 +92,11 @@ export const GroupStoreModel = types
     get yourGroupId() {
       return store.yourGroup?.group_id
     },
+
+    get hasLoads() {
+      const hasALoad = store.yourGroup?.groupLoadDays.some((day) => day.loads.length > 0)
+      return hasALoad
+    }
   }))
   .actions((store) => ({
   }))

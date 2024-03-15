@@ -8,6 +8,7 @@ export const AuthenticationStoreModel = types
     refreshToken: types.maybe(types.string),
     userId: types.maybe(types.integer),
     userGroupId: types.maybe(types.integer),
+    validated: types.optional(types.boolean, false),
   })
   .views((store) => ({
     get isAuthenticated() {
@@ -30,12 +31,15 @@ export const AuthenticationStoreModel = types
     setUserGroupId(value?: number) {
       store.userGroupId = value
     },
+    setIsValidated(value: boolean) {
+      store.validated = value
+    },
     distributeAuthToken() {
       const token = store.authToken;
       api.apisauce.setHeader("Authorization", `Bearer ${token}`);
     },
     async validateAndRefreshToken() {
-      if (!store.authToken) {
+      if (!store.authToken || store.validated) {
         return
       }
       console.log(`❗️❗️❗️ Checking Auth Token`, store.authToken)
@@ -49,18 +53,20 @@ export const AuthenticationStoreModel = types
           console.log(`❗️❗️❗️ response REFRESH`, response)
           this.setAuthToken(response.token)
           this.setRefreshToken(response.refreshToken)
+          this.setIsValidated(true)
           this.distributeAuthToken()
         })
-        // })
       }).then((response: any) => {
         api.apisauce.setHeader("Authorization", `Bearer ${store.authToken}`);
         console.log(`❗️❗️❗️ TOKEN HAS BEEN VALIDATED. WE"RE GOOD`, response)
+        this.setIsValidated(true)
       })
     },
     logout() {
       store.authToken = undefined
       store.userId = undefined
       store.userGroupId = undefined
+      store.validated = false
     },
   }))
 
