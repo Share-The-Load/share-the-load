@@ -4,7 +4,7 @@ import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigatio
 import { colors, spacing, typography } from "app/theme"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Image, ImageStyle, TextStyle, ViewStyle } from "react-native"
-import { GroupHomeScreen, HomeScreen, ProfileScreen } from "app/screens"
+import { GroupHomeScreen, HomeScreen, LoadsScreen, ProfileScreen } from "app/screens"
 import { Button, Icon } from "app/components"
 import { CompositeScreenProps } from "@react-navigation/native"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
@@ -14,6 +14,7 @@ export type MainNavigatorParamList = {
   Home: undefined
   Profile: undefined
   GroupHome: undefined
+  Loads: undefined
 }
 
 export type MainTabScreenProps<T extends keyof MainNavigatorParamList> = CompositeScreenProps<
@@ -53,6 +54,16 @@ export function MainNavigator() {
         component={GroupHomeScreen}
         options={{
           tabBarLabel: "Your Group",
+          tabBarIcon: ({ focused }) => (
+            <Icon icon="person" color={focused ? colors.tint : undefined} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Loads"
+        component={LoadsScreen}
+        options={{
+          tabBarLabel: "Loads",
           tabBarIcon: ({ focused }) => (
             <Icon icon="person" color={focused ? colors.tint : undefined} size={30} />
           ),
