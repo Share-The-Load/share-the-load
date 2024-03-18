@@ -2,8 +2,8 @@
 import { ApiResponse, ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
-import type { ApiConfig, ApiGroupResponse, ApiGenericResponse, ApiGroupsResponse, ApiFetchNewSloganResponse } from "./api.types"
-import { GroupSnapshotIn, UserSnapshotIn } from "app/models"
+import type { ApiConfig, ApiGroupResponse, ApiGenericResponse, ApiGroupsResponse, ApiFetchNewSloganResponse, ApiLoadsResponse } from "./api.types"
+import { GroupDaySnapshotIn, GroupSnapshotIn, UserSnapshotIn } from "app/models"
 
 
 /**
@@ -97,7 +97,6 @@ export class Api {
 
   async getProfile(): Promise<{ kind: "ok"; profile: UserSnapshotIn | undefined } | GeneralApiProblem> {
     const response: ApiResponse<UserSnapshotIn> = await this.apisauce.get(`/profile`)
-    console.log(`❗️❗️❗️ APIS`, response)
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
@@ -151,6 +150,7 @@ export class Api {
     }
     return { kind: "ok" }
   }
+
   async fetchNewSlogan(): Promise<{ kind: "ok", slogan: string | undefined } | GeneralApiProblem> {
     const response: ApiResponse<ApiFetchNewSloganResponse> = await this.apisauce.get(`/get-slogan`)
     if (!response.ok) {
@@ -158,6 +158,15 @@ export class Api {
       if (problem) return problem
     }
     return { kind: "ok", slogan: response.data?.slogan }
+  }
+
+  async getLoadsHome(): Promise<{ kind: "ok", days: GroupDaySnapshotIn[] | undefined } | GeneralApiProblem> {
+    const response: ApiResponse<ApiLoadsResponse> = await this.apisauce.get(`/group-loads`)
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok", days: response.data?.days }
   }
 
 }
