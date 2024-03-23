@@ -78,7 +78,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
       <Text preset="subheading" style={$subheaderStyle} text="Preferences" />
 
-
       <ListItemNoClick
         text="Load Time"
         RightComponent={
@@ -112,7 +111,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
             >
               <RNDateTimePicker
                 mode="time"
-                minuteInterval={15}
+                minuteInterval={30}
                 value={createDate(pref?.start_time)}
                 onChange={(event, newStartTime) => {
                   const time = formatTime(newStartTime)
@@ -122,7 +121,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               <Text style={{ marginTop: spacing.xxs, marginLeft: spacing.xs }} text={`-`} />
               <RNDateTimePicker
                 mode="time"
-                minuteInterval={15}
+                minuteInterval={30}
                 value={createDate(pref?.end_time)}
                 onChange={(event, newEndTime) => {
                   const newTime = formatTime(newEndTime)

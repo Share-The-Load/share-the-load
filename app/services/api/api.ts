@@ -169,6 +169,15 @@ export class Api {
     return { kind: "ok", days: response.data?.days }
   }
 
+  async schedule(loads: any[], urgent: boolean): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/schedule`, { loads, urgent })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+
 }
 // Singleton instance of the API for convenience
 export const api = new Api()
