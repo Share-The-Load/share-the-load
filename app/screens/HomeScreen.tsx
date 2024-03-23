@@ -102,7 +102,8 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                         key={load?.load_id}
                         heading={load?.loadMember?.username || ""}
                         content={`${load.loadTime}`}
-                        style={{ marginBottom: spacing.sm }}
+                        footer={load?.load_type || ""}
+                        style={{ marginBottom: spacing.sm, alignItems: "center" }}
                         LeftComponent={
                           <Image
                             source={oysterLogo}
