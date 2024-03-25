@@ -110,6 +110,7 @@ export const iconRegistry = {
   settings: require("../../assets/icons/settings.png"),
   slack: require("../../assets/icons/demo/slack.png"),
   square_minus: require("../../assets/icons/square-minus.png"),
+  trash: require("../../assets/icons/trash.png"),
   view: require("../../assets/icons/view.png"),
   x: require("../../assets/icons/x.png"),
 }

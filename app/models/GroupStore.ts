@@ -77,6 +77,14 @@ export const GroupStoreModel = types
       else {
         throw new Error(`Error fetching loads: ${JSON.stringify(response)}`)
       }
+    },
+    async schedule(loads: any[], urgent: boolean) {
+      const response = await api.schedule(loads, urgent)
+      if (response.kind === "ok") {
+        return response
+      } else {
+        throw new Error(`Error scheduling loads: ${JSON.stringify(response)}`)
+      }
     }
   }))
   .views((store) => ({
