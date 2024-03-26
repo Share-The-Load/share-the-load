@@ -112,6 +112,7 @@ export const iconRegistry = {
   square_minus: require("../../assets/icons/square-minus.png"),
   trash: require("../../assets/icons/trash.png"),
   view: require("../../assets/icons/view.png"),
+  users: require("../../assets/icons/users.png"),
   x: require("../../assets/icons/x.png"),
 }
 

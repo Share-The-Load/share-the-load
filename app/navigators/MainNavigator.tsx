@@ -3,12 +3,11 @@ import React from "react"
 import { BottomTabScreenProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { colors, spacing, typography } from "app/theme"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { Image, ImageStyle, TextStyle, ViewStyle } from "react-native"
+import { TextStyle, ViewStyle } from "react-native"
 import { GroupHomeScreen, HomeScreen, ProfileScreen } from "app/screens"
-import { Button, Icon } from "app/components"
+import { Icon } from "app/components"
 import { CompositeScreenProps } from "@react-navigation/native"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
-const avatar = require("../../assets/images/app-icon-all.png")
 
 export type MainNavigatorParamList = {
   Home: undefined
@@ -54,7 +53,7 @@ export function MainNavigator() {
         options={{
           tabBarLabel: "Your Group",
           tabBarIcon: ({ focused }) => (
-            <Icon icon="person" color={focused ? colors.tint : undefined} size={30} />
+            <Icon icon="users" color={focused ? colors.tint : undefined} size={30} />
           ),
         }}
       />
@@ -64,7 +63,7 @@ export function MainNavigator() {
         options={{
           tabBarLabel: "Profile",
           tabBarIcon: ({ focused }) => (
-            <Icon icon="person" color={focused ? colors.tint : undefined} size={30} />
+            <Icon icon="person" color={focused ? colors.tint : undefined} size={25} />
           ),
         }}
       />
@@ -85,9 +84,4 @@ const $tabBarLabel: TextStyle = {
   fontSize: 12,
   fontFamily: typography.primary.medium,
   lineHeight: 16,
-}
-const $welcomeLogo: ImageStyle = {
-  height: 88,
-  width: "100%",
-  marginBottom: spacing.xxl,
 }

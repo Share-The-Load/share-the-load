@@ -10,7 +10,7 @@ import { UserModel } from "./User"
 export const UserStoreModel = types
   .model("UserStore")
   .props({
-    user: types.maybeNull(UserModel),
+    user: types.optional(UserModel, {}),
   })
   .actions(withSetPropAction)
   .views((self) => ({
