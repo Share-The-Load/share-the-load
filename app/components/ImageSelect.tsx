@@ -12,6 +12,7 @@ import {
 import { observer } from "mobx-react-lite"
 import { colors, spacing, typography } from "app/theme"
 import { Text } from "app/components/Text"
+import { getLoadImage } from "app/constants/images"
 
 export interface ImageSelectProps extends TouchableOpacityProps {
   /**
@@ -31,7 +32,7 @@ export const ImageSelect = observer(function ImageSelect(props: ImageSelectProps
 
   return (
     <TouchableOpacity onPress={onPress} style={$styles}>
-      <Image style={$imageStyle} source={require("../../assets/images/app-icon-all.png")} />
+      <Image style={$imageStyle} source={getLoadImage(label)} />
       <Text style={$text} text={label}></Text>
     </TouchableOpacity>
   )

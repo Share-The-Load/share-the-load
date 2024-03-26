@@ -5,10 +5,10 @@ import { AppStackScreenProps } from "app/navigators"
 import { Button, Card, Icon, Screen, Text, TextField, Toggle } from "app/components"
 import { useStores } from "app/models"
 import { colors, spacing } from "app/theme"
+import { getAvatarImage, getGroupImage } from "app/constants/images"
 
 const MAX_GROUP_NAME_LENGTH = 25
 
-const avatar = require("../../assets/images/app-icon-all.png")
 interface GroupHomeScreenProps extends AppStackScreenProps<"GroupHome"> {}
 
 export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function GroupHomeScreen() {
@@ -92,7 +92,7 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
       <Image
-        source={avatar}
+        source={getGroupImage(yourGroup?.avatar_id)}
         style={{ width: "100%", height: 80, borderRadius: 10, alignSelf: "center" }}
       />
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -128,7 +128,7 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
           }}
           LeftComponent={
             <Image
-              source={avatar}
+              source={getAvatarImage(member?.avatar_id)}
               style={{ width: 60, height: 60, borderRadius: 20, marginEnd: spacing.xs }}
             />
           }

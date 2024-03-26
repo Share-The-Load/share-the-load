@@ -13,7 +13,7 @@ export const LoadModel = types
     group_id: types.maybeNull(types.number),
     start_time: types.maybeNull(types.string),
     end_time: types.maybeNull(types.string),
-    load_type: types.maybeNull(types.string),
+    load_type: types.maybe(types.string),
     loadMember: types.maybeNull(GroupMemberModel)
   })
   .actions(withSetPropAction)

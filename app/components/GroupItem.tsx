@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+  Image,
   StyleProp,
   TextStyle,
   TouchableOpacity,
@@ -11,7 +12,7 @@ import { observer } from "mobx-react-lite"
 import { colors, spacing } from "app/theme"
 import { Text, TextProps } from "app/components/Text"
 import { Icon } from "./Icon"
-import { AutoImage } from "./AutoImage"
+import { getGroupImage } from "app/constants/images"
 
 export interface GroupItemProps extends TouchableOpacityProps {
   /**
@@ -29,7 +30,7 @@ export interface GroupItemProps extends TouchableOpacityProps {
 
   owner?: string
 
-  avatar?: string
+  avatarId?: number
 
   hasPasscode?: boolean
 
@@ -49,6 +50,7 @@ export const GroupItem = observer(function GroupItem(props: GroupItemProps) {
     topSeparator,
     hasPasscode,
     membersCount,
+    avatarId,
     ...TouchableOpacityProps
   } = props
 
@@ -59,13 +61,9 @@ export const GroupItem = observer(function GroupItem(props: GroupItemProps) {
   return (
     <View style={$containerStyles}>
       <TouchableOpacity {...TouchableOpacityProps} style={$touchableStyles}>
-        <AutoImage
-          maxWidth={50}
-          maxHeight={60}
-          style={{ alignSelf: "center", marginEnd: spacing.md }}
-          source={{
-            uri: "https://stat-outdoors-bucket.s3.us-east-2.amazonaws.com/igloo.png",
-          }}
+        <Image
+          style={{ alignSelf: "center", marginEnd: spacing.md, width: 50, height: 50 }}
+          source={getGroupImage(avatarId)}
         />
         <View style={$textContainer}>
           <Text text={text} style={$titleStyle}></Text>

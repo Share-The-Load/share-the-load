@@ -1,7 +1,6 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { GroupMemberModel } from "./GroupMember"
-import { LoadSnapshotIn } from "./Load";
 import { GroupDayModel, GroupDaySnapshotIn } from "./GroupDay";
 
 /**
