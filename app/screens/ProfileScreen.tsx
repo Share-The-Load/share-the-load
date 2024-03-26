@@ -9,9 +9,7 @@ import { useStores } from "app/models"
 import RNPickerSelect from "react-native-picker-select"
 import RNDateTimePicker from "@react-native-community/datetimepicker"
 import { set } from "date-fns"
-import { ListItemNoClick } from "app/components/ListItemNoClick"
-
-const avatar = require("../../assets/images/app-icon-all.png")
+import { getAvatarImage } from "app/constants/images"
 
 interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
@@ -57,14 +55,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
-      {/* <Text style={$title} preset="heading" text="Profile" /> */}
-
       <ActivityIndicator animating={isLoading} size="large" color={colors.palette.accent700} />
 
       <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
         <Image
           style={{ alignSelf: "flex-start", marginEnd: spacing.md, width: 100, height: 100 }}
-          source={avatar}
+          source={getAvatarImage(profile?.avatar)}
         />
         <View>
           <Text style={$titleStyle} text={profile?.username} />
@@ -78,11 +74,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 
       <Text preset="subheading" style={$subheaderStyle} text="Preferences" />
 
-      <ListItemNoClick
+      <ListItem
         text="Load Time"
         RightComponent={
           <RNPickerSelect
             onValueChange={(value) => callUpdateLoadTime(value)}
+            style={{ viewContainer: { alignSelf: "center" } }}
             value={profile?.load_time}
             items={[
               { label: "30 minutes", value: 30 },
@@ -146,10 +143,6 @@ const $container: ViewStyle = {
   paddingHorizontal: spacing.lg,
 }
 
-const $title: TextStyle = {
-  marginBottom: spacing.md,
-}
-
 const $titleStyle: TextStyle = {
   flexGrow: 1,
   color: colors.palette.primary600,
@@ -161,5 +154,5 @@ const $subheaderStyle: TextStyle = {
 }
 
 const $buttonContainer: ViewStyle = {
-  marginBottom: spacing.md,
+  marginVertical: spacing.md,
 }

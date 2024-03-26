@@ -172,6 +172,7 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
                   hasPasscode={group?.hasPasscode}
                   membersCount={group?.numberOfMembers}
                   owner={group?.ownerName}
+                  avatarId={group?.avatar_id}
                   onPress={() => joinGroup(group)}
                 />
               ))}

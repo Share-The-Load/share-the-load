@@ -5,8 +5,9 @@ import { Button, Card, Icon, ImageSelect, ListItem, Screen, Text, Toggle } from 
 import { colors, spacing } from "../theme"
 import { useStores } from "../models"
 import { getRandomNoLoadMessage } from "app/constants/noLoadMessages"
+import { getLoadImage } from "app/constants/images"
 
-const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
+const welcomeLogo = require("../../assets/images/logo.png")
 const oysterLogo = require("../../assets/images/oyster.png")
 
 export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_props) {
@@ -106,7 +107,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                         style={{ marginBottom: spacing.sm, alignItems: "center" }}
                         LeftComponent={
                           <Image
-                            source={oysterLogo}
+                            source={getLoadImage(load?.load_type)}
                             style={{
                               width: 50,
                               height: 50,
@@ -140,7 +141,14 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
             console.log("Modal has been closed")
           }}
         >
-          <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "flex-start" }}>
+          <Screen
+            preset="scroll"
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+            }}
+          >
             <View
               style={{
                 width: "100%",
@@ -177,6 +185,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
               >
                 <ImageSelect label="Whites" onPress={() => addLoad("Whites")} />
                 <ImageSelect label="Darks" onPress={() => addLoad("Darks")} />
+                <ImageSelect label="Colors" onPress={() => addLoad("Colors")} />
                 <ImageSelect label="Delicates" onPress={() => addLoad("Delicates")} />
                 <ImageSelect label="Towels" onPress={() => addLoad("Towels")} />
                 <ImageSelect label="Bedding" onPress={() => addLoad("Bedding")} />
@@ -200,7 +209,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                   style={{ alignItems: "center" }}
                   LeftComponent={
                     <Image
-                      source={oysterLogo}
+                      source={getLoadImage(load?.type)}
                       style={{ width: 30, height: 30, marginEnd: spacing.sm }}
                     />
                   }
@@ -208,7 +217,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                     <Icon
                       icon="trash"
                       size={24}
-                      color={colors.palette.secondary500}
+                      color={colors.palette.angry500}
                       onPress={() => setLoads(loads.filter((l: any) => l.id !== load.id))}
                     />
                   }
@@ -224,7 +233,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                 containerStyle={{ marginVertical: spacing.md }}
               />
 
-              <View style={$buttonContainer}>
+              <View>
                 <Button
                   preset="primary"
                   text="Schedule"
@@ -248,10 +257,10 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                 />
               </View>
             </View>
-          </View>
+          </Screen>
         </Modal>
       </Screen>
-      <View style={$buttonContainer}>
+      <View>
         <Button
           preset="primary"
           style={$button}
@@ -270,7 +279,8 @@ const $container: ViewStyle = {
 }
 
 const $title: TextStyle = {
-  marginBottom: spacing.xxl,
+  marginBottom: spacing.lg,
+  color: colors.palette.accent600,
 }
 
 const $welcomeLogo: ImageStyle = {
@@ -282,16 +292,12 @@ const $welcomeLogo: ImageStyle = {
 }
 
 const $oyster: ImageStyle = {
-  height: 200,
-  marginBottom: spacing.xxl,
+  height: 400,
+  width: "100%",
+  marginBottom: spacing.sm,
   marginTop: spacing.sm,
-  alignSelf: "center",
 }
 
 const $button: ViewStyle = {
   marginBottom: spacing.xs,
-}
-
-const $buttonContainer: ViewStyle = {
-  // marginBottom: spacing.md,
 }
