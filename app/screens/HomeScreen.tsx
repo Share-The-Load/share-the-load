@@ -7,7 +7,7 @@ import { useStores } from "../models"
 import { getRandomNoLoadMessage } from "app/constants/noLoadMessages"
 import { getLoadImage } from "app/constants/images"
 
-const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
+const welcomeLogo = require("../../assets/images/logo.png")
 const oysterLogo = require("../../assets/images/oyster.png")
 
 export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_props) {
@@ -233,7 +233,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
                 containerStyle={{ marginVertical: spacing.md }}
               />
 
-              <View style={$buttonContainer}>
+              <View>
                 <Button
                   preset="primary"
                   text="Schedule"
@@ -260,7 +260,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
           </Screen>
         </Modal>
       </Screen>
-      <View style={$buttonContainer}>
+      <View>
         <Button
           preset="primary"
           style={$button}
@@ -279,7 +279,7 @@ const $container: ViewStyle = {
 }
 
 const $title: TextStyle = {
-  marginBottom: spacing.xxl,
+  marginBottom: spacing.md,
 }
 
 const $welcomeLogo: ImageStyle = {
@@ -291,16 +291,13 @@ const $welcomeLogo: ImageStyle = {
 }
 
 const $oyster: ImageStyle = {
-  height: 200,
-  marginBottom: spacing.xxl,
+  height: 500,
+  width: "100%",
+  marginBottom: spacing.sm,
   marginTop: spacing.sm,
   alignSelf: "center",
 }
 
 const $button: ViewStyle = {
   marginBottom: spacing.xs,
-}
-
-const $buttonContainer: ViewStyle = {
-  // marginBottom: spacing.md,
 }

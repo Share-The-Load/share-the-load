@@ -7,7 +7,7 @@ import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import axios from "app/utils/axios"
-const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
+const welcomeLogo = require("../../assets/images/logo.png")
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 

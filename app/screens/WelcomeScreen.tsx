@@ -2,15 +2,13 @@ import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Text } from "app/components"
-import { isRTL } from "../i18n"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import { useHeader } from "../utils/useHeader"
 import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
 
-const welcomeLogo = require("../../assets/images/shareTheLoadLogo.png")
-const welcomeFace = require("../../assets/images/welcome-face.png")
+const laundryRoom = require("../../assets/images/laundry_room.png")
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
@@ -37,7 +35,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
   return (
     <View style={$container}>
       <View style={$topContainer}>
-        <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
+        <Image style={$welcomeLogo} source={laundryRoom} resizeMode="contain" />
         <Text
           testID="welcome-heading"
           style={$welcomeHeading}
@@ -45,24 +43,29 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
           preset="heading"
         />
         <Text tx="welcomeScreen.exciting" preset="subheading" />
-        {/* TODO: Add a midjourney washing machine image here */}
-        {/* <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" /> */}
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
-        <Text tx="welcomeScreen.postscript" size="md" />
-        <Button
-          testID="next-screen-button"
-          preset="default"
-          tx="welcomeScreen.letsGo"
-          onPress={() => goNext("find")}
+        <Text
+          style={{ color: colors.palette.secondary500 }}
+          tx="welcomeScreen.postscript"
+          size="md"
         />
-        <Button
-          testID="next-screen-button"
-          preset="primary"
-          text="Create Group"
-          onPress={() => goNext("create")}
-        />
+        <View>
+          <Button
+            testID="next-screen-button"
+            preset="default"
+            tx="welcomeScreen.letsGo"
+            style={{ marginVertical: spacing.sm }}
+            onPress={() => goNext("find")}
+          />
+          <Button
+            testID="next-screen-button"
+            preset="primary"
+            text="Create Group"
+            onPress={() => goNext("create")}
+          />
+        </View>
       </View>
     </View>
   )
@@ -92,18 +95,9 @@ const $bottomContainer: ViewStyle = {
   justifyContent: "space-around",
 }
 const $welcomeLogo: ImageStyle = {
-  height: 88,
+  height: 250,
   width: "100%",
-  marginBottom: spacing.xxl,
-}
-
-const $welcomeFace: ImageStyle = {
-  height: 169,
-  width: 269,
-  position: "absolute",
-  bottom: -47,
-  right: -80,
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
+  marginBottom: spacing.md,
 }
 
 const $welcomeHeading: TextStyle = {
