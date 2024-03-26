@@ -279,7 +279,8 @@ const $container: ViewStyle = {
 }
 
 const $title: TextStyle = {
-  marginBottom: spacing.md,
+  marginBottom: spacing.lg,
+  color: colors.palette.accent600,
 }
 
 const $welcomeLogo: ImageStyle = {
@@ -291,11 +292,10 @@ const $welcomeLogo: ImageStyle = {
 }
 
 const $oyster: ImageStyle = {
-  height: 500,
+  height: 400,
   width: "100%",
   marginBottom: spacing.sm,
   marginTop: spacing.sm,
-  alignSelf: "center",
 }
 
 const $button: ViewStyle = {
