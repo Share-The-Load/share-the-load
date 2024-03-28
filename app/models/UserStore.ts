@@ -1,16 +1,13 @@
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { navigate } from "app/navigators"
 import { api } from "app/services/api"
 import { UserModel } from "./User"
 
-/**
- * Model description here for TypeScript hints.
- */
 export const UserStoreModel = types
   .model("UserStore")
   .props({
-    user: types.optional(UserModel, {}),
+    user: types.maybe(UserModel),
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -44,6 +41,16 @@ export const UserStoreModel = types
         throw new Error(`Error updating preference: ${JSON.stringify(response)}`)
       }
     },
+    async editProfile(email: string, newPassword: string, avatar: number) {
+      const response = await api.editProfile(email, newPassword, avatar)
+      if (response.kind === "ok") {
+        self.profile?.updateAvatar(avatar)
+        self.profile?.updateEmail(email)
+        return response
+      } else {
+        throw new Error(`Error updating profile: ${JSON.stringify(response)}`)
+      }
+    },
     goToProfile() {
       navigate("Profile")
       console.log("goToProfile")
@@ -52,5 +59,3 @@ export const UserStoreModel = types
 
 export interface UserStore extends Instance<typeof UserStoreModel> { }
 export interface UserStoreSnapshotOut extends SnapshotOut<typeof UserStoreModel> { }
-export interface UserStoreSnapshotIn extends SnapshotIn<typeof UserStoreModel> { }
-export const createUserStoreDefaultModel = () => types.optional(UserStoreModel, {})

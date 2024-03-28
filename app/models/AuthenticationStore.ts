@@ -8,11 +8,14 @@ export const AuthenticationStoreModel = types
     refreshToken: types.maybe(types.string),
     userId: types.maybe(types.integer),
     userGroupId: types.maybe(types.integer),
-    validated: types.optional(types.boolean, false),
+    validated: types.maybe(types.boolean),
   })
   .views((store) => ({
     get isAuthenticated() {
       return !!store.authToken
+    },
+    get isValidated() {
+      return store.validated
     },
     get hasGroup() {
       return !!store.userGroupId
@@ -48,6 +51,7 @@ export const AuthenticationStoreModel = types
         console.log(`❗️❗️❗️ REFRESH TOKEN`, store.refreshToken)
         await api.refreshToken(store.refreshToken).catch((error: any) => {
           console.error(`Error refreshing token: ${error}`)
+          store.validated = false
           this.logout()
         }).then((response: any) => {
           console.log(`❗️❗️❗️ response REFRESH`, response)
