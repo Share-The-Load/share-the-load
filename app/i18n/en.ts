@@ -9,7 +9,7 @@ const en = {
     postscript:
       "Time to join the laundry revolution. Click a button below to get started.",
     readyForLaunch: "You're almost ready to launder...",
-    exciting: "(you can finally wear some new socks)",
+    exciting: "(you can finally wear some clean socks)",
     letsGo: "Find Group",
   },
   errorScreen: {

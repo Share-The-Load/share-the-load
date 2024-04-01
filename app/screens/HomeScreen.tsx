@@ -117,7 +117,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
                     preset="default"
                     text={getRandomNoLoadMessage()}
                     key={day?.day + "noLoads"}
-                    style={{ marginBottom: spacing.sm }}
+                    style={{ marginBottom: spacing.sm, color: colors.palette.accent300 }}
                   />
                 ) : (
                   <>
