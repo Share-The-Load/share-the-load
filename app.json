@@ -1,10 +1,15 @@
 {
   "name": "share-the-load",
-  "displayName": "share-the-load",
+  "displayName": "Share The Load",
   "expo": {
-    "name": "share-the-load",
+    "name": "Share The Load",
     "slug": "share-the-load",
     "scheme": "share-the-load",
+    "extra": {
+      "eas": {
+        "projectId": "4044f554-684f-49e8-9b20-ee0a29e9e3c2"
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-all.png",
@@ -17,12 +22,10 @@
       "fallbackToCacheTimeout": 0
     },
     "jsEngine": "hermes",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
-      "package": "com.sharetheload",
+      "package": "com.sharetheload.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
@@ -36,7 +39,7 @@
     "ios": {
       "icon": "./assets/images/app-icon-ios.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.sharetheload",
+      "bundleIdentifier": "com.sharetheload.app",
       "splash": {
         "image": "./assets/images/splash-logo-ios-mobile.png",
         "tabletImage": "./assets/images/splash-logo-ios-tablet.png",
