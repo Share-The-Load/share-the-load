@@ -8,13 +8,13 @@ import moment from 'moment'
 export const LoadModel = types
   .model("Load")
   .props({
-    load_id: types.maybeNull(types.number),
-    user_id: types.maybeNull(types.number),
-    group_id: types.maybeNull(types.number),
-    start_time: types.maybeNull(types.string),
-    end_time: types.maybeNull(types.string),
-    load_type: types.maybe(types.string),
-    loadMember: types.maybeNull(GroupMemberModel)
+    load_id: types.identifierNumber,
+    user_id: 0,
+    group_id: 0,
+    start_time: "",
+    end_time: "",
+    load_type: "",
+    loadMember: GroupMemberModel
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -29,4 +29,3 @@ export const LoadModel = types
 export interface Load extends Instance<typeof LoadModel> { }
 export interface LoadSnapshotOut extends SnapshotOut<typeof LoadModel> { }
 export interface LoadSnapshotIn extends SnapshotIn<typeof LoadModel> { }
-export const createLoadDefaultModel = () => types.optional(LoadModel, {})

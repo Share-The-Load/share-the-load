@@ -1,25 +1,47 @@
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { ActivityIndicator, TextStyle, View, ViewStyle, Image } from "react-native"
+import { ActivityIndicator, TextStyle, View, ViewStyle, Image, ScrollView } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
-import { Button, ListItem, Screen, Text } from "app/components"
+import { AvatarSelect, Button, ListItem, Screen, Text, TextField, Toggle } from "app/components"
 import { colors, spacing } from "app/theme"
 import { useStores } from "app/models"
 
 import RNPickerSelect from "react-native-picker-select"
 import RNDateTimePicker from "@react-native-community/datetimepicker"
 import { set } from "date-fns"
-import { getAvatarImage } from "app/constants/images"
+import { AVATARS, getAvatarImage } from "app/constants/images"
+import Modal from "react-native-modal"
 
 interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen() {
   const {
-    authenticationStore: { logout },
-    userStore: { getProfile, updateLoadTime, updatePreference, profile },
+    authenticationStore: { logout, distributeAuthToken },
+    userStore: { getProfile, updateLoadTime, updatePreference, editProfile, profile },
   } = useStores()
 
   const [isLoading, setIsLoading] = useState(false)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [email, setEmail] = useState(profile?.email || "")
+  const [newPassword, setNewPassword] = useState("")
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [avatar, setAvatar] = useState(profile?.avatar || 1)
+
+  const emailError = isSubmitted ? registerEmailValidationError() : ""
+  const passwordError = isSubmitted ? registerPasswordValidationError() : ""
+
+  function registerEmailValidationError() {
+    if (email?.length === 0) return "can't be blank"
+    if (email?.length < 6) return "must be at least 6 characters"
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "must be a valid email address"
+    return ""
+  }
+
+  function registerPasswordValidationError() {
+    if (newPassword.length > 0 && newPassword.length < 6) return "must be at least 6 characters"
+    return ""
+  }
 
   function createDate(time: string): Date {
     const [hours, minutes] = time.split(":").map((t) => parseInt(t))
@@ -33,6 +55,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   }
 
   useEffect(() => {
+    distributeAuthToken()
     getProfile()
       .catch((e) => console.log(e))
       .then(() => {
@@ -50,6 +73,15 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   function callUpdatePrefTime(preference_id: number, startTime: string, endTime: string) {
     updatePreference(preference_id, startTime, endTime)
       .then(() => console.log("Upadated Pref Time"))
+      .catch((e) => console.log(e))
+  }
+
+  function callEditProfile() {
+    setIsSubmitted(true)
+    if (registerEmailValidationError()) return
+    if (registerPasswordValidationError()) return
+    editProfile(email, newPassword, avatar)
+      .then(() => setIsEditing(!isEditing))
       .catch((e) => console.log(e))
   }
 
@@ -71,15 +103,30 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <Text style={$subheaderStyle} text={`Sharing Loads for ${profile?.memberSince}`} />
         </View>
       </View>
+      <Button preset="small" text="Edit Profile" onPress={() => setIsEditing(true)} />
 
-      <Text preset="subheading" style={$subheaderStyle} text="Preferences" />
+      <Text preset="subheading" style={{ marginTop: spacing.md }} text="Preferences" />
 
       <ListItem
         text="Load Time"
         RightComponent={
           <RNPickerSelect
             onValueChange={(value) => callUpdateLoadTime(value)}
-            style={{ viewContainer: { alignSelf: "center" } }}
+            style={{
+              viewContainer: {
+                alignSelf: "center",
+                backgroundColor: colors.palette.accent100,
+                borderRadius: 10,
+                width: 120,
+                height: 40,
+                justifyContent: "center",
+                alignContent: "center",
+                alignItems: "center",
+              },
+              inputIOS: {
+                fontSize: 18,
+              },
+            }}
             value={profile?.load_time}
             items={[
               { label: "30 minutes", value: 30 },
@@ -87,6 +134,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               { label: "90 minutes", value: 90 },
               { label: "120 minutes", value: 120 },
               { label: "150 minutes", value: 150 },
+              { label: "180 minutes", value: 180 },
             ]}
           />
         }
@@ -131,14 +179,101 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
       ))}
 
       <View style={$buttonContainer}>
-        <Button preset="secondary" tx="common.logOut" onPress={logout} />
+        <Button preset="filled" tx="common.logOut" onPress={logout} />
       </View>
+
+      <Modal
+        isVisible={isEditing}
+        backdropColor="white"
+        backdropOpacity={1}
+        scrollHorizontal={true}
+        coverScreen={true}
+      >
+        <ScrollView style={{ marginTop: spacing.xxxl }}>
+          <Text preset="subheading" style={{ marginBottom: 20 }} text="Edit Profile" />
+
+          <TextField
+            value={profile?.username}
+            editable={false}
+            containerStyle={{ marginBottom: spacing.md }}
+          />
+          <TextField
+            value={email}
+            onChangeText={setEmail}
+            containerStyle={{ marginBottom: spacing.md }}
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            keyboardType="email-address"
+            label="Email"
+            placeholder="Enter your email"
+            helper={emailError}
+            status={emailError ? "error" : undefined}
+          />
+          <Text preset="formLabel" style={{ marginBottom: 20 }} text="Avatar" />
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignContent: "flex-start",
+              flexWrap: "wrap",
+            }}
+          >
+            {AVATARS.map((group, index) => (
+              <AvatarSelect
+                key={group}
+                avatar={group}
+                selected={index + 1 === avatar}
+                onPress={() => setAvatar(index + 1)}
+              ></AvatarSelect>
+            ))}
+          </View>
+
+          <TextField
+            value={newPassword}
+            onChangeText={setNewPassword}
+            containerStyle={{ marginBottom: spacing.md }}
+            autoCapitalize="none"
+            autoComplete="off"
+            autoCorrect={false}
+            keyboardType="default"
+            label="Change Password"
+            placeholder="super secret password"
+            helper="Must be at least 6 characters"
+            status={passwordError ? "error" : undefined}
+          />
+
+          <View style={$buttonContainer}>
+            <Button
+              preset="primary"
+              text="Save"
+              style={{ marginBottom: spacing.sm }}
+              onPress={() => {
+                console.log("Modal has been closed.")
+                callEditProfile()
+              }}
+              disabledStyle={{ backgroundColor: colors.palette.neutral400 }}
+              disabled={emailError !== ""}
+            />
+            <Button
+              preset="default"
+              text="Cancel"
+              onPress={() => {
+                console.log("Modal has been closed.")
+                setIsEditing(!isEditing)
+                setAvatar(profile?.avatar || 1)
+                setEmail(profile?.email || "")
+                setNewPassword("")
+              }}
+            />
+          </View>
+        </ScrollView>
+      </Modal>
     </Screen>
   )
 })
 
 const $container: ViewStyle = {
-  paddingTop: spacing.md,
   paddingBottom: spacing.md,
   paddingHorizontal: spacing.lg,
 }

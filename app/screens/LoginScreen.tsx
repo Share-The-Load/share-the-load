@@ -30,6 +30,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       distributeAuthToken,
       setUserGroupId,
       setUserId,
+      setIsValidated,
     },
   } = useStores()
 
@@ -71,6 +72,7 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         setAuthToken(res.data.user.token)
         setRefreshToken(res.data.user.refreshToken)
         distributeAuthToken()
+        setIsValidated(true)
         setUserId(res.data.user.userId)
         setIsLoading(false)
       })

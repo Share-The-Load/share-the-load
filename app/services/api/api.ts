@@ -95,14 +95,31 @@ export class Api {
     return { kind: "ok", group: response.data?.group }
   }
 
-  async getProfile(): Promise<{ kind: "ok"; profile: UserSnapshotIn | undefined } | GeneralApiProblem> {
+  async getProfile(): Promise<{ kind: "ok"; profile: UserSnapshotIn } | GeneralApiProblem> {
     const response: ApiResponse<UserSnapshotIn> = await this.apisauce.get(`/profile`)
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem
     }
+    try {
+      const rawData = response.data
 
-    return { kind: "ok", profile: response.data }
+      if (rawData && 'user_id' in rawData) {
+        const profile: UserSnapshotIn = {
+          ...rawData,
+        }
+
+        return { kind: "ok", profile }
+      } else {
+        throw new Error('user_id is missing in the response data');
+      }
+    } catch (e) {
+      if (__DEV__ && e instanceof Error) {
+        console.error(`Bad data: ${e.message}\n${response.data}`, e.stack)
+      }
+      return { kind: "bad-data" }
+    }
+
   }
 
   async updateLoadTime(loadTime: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
@@ -142,7 +159,7 @@ export class Api {
     return { kind: "ok" }
   }
 
-  async removeMember(memberId: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
+  async removeMember(memberId: number | undefined): Promise<{ kind: "ok" } | GeneralApiProblem> {
     const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/remove-member`, { memberId })
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
@@ -171,6 +188,45 @@ export class Api {
 
   async schedule(loads: any[], urgent: boolean): Promise<{ kind: "ok" } | GeneralApiProblem> {
     const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/schedule`, { loads, urgent })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+
+  async deleteLoad(loadId: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/delete-load`, { loadId })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    if (response.data?.status === "error") {
+      return { kind: "bad-data" }
+    }
+    return { kind: "ok" }
+  }
+
+  async editGroup(groupName: string, slogan: string, avatar_id: number, passcode: string | undefined): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/edit-group`, { name: groupName, slogan, avatar_id, passcode })
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+
+  async removeGroupPasscode(): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/remove-passcode`)
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+    return { kind: "ok" }
+  }
+
+  async editProfile(email: string, password: string, avatar_id: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const response: ApiResponse<ApiGenericResponse> = await this.apisauce.post(`/edit-profile`, { password, email, avatar: avatar_id })
     if (!response.ok) {
       const problem = getGeneralApiProblem(response)
       if (problem) return problem

@@ -24,7 +24,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
   const [registerUsername, setRegisterUsername] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(false)
   const [isUsernameTaken, setIsUsernameTaken] = useState(false)
 
   const emailError = isSubmitted ? registerEmailValidationError() : ""
@@ -169,7 +168,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
         autoCapitalize="none"
         autoComplete="password"
         autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
         labelTx="loginScreen.passwordFieldLabel"
         placeholderTx="loginScreen.passwordFieldPlaceholder"
         onSubmitEditing={register}

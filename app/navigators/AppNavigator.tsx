@@ -63,7 +63,7 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated, hasGroup },
+    authenticationStore: { isAuthenticated, hasGroup, isValidated },
   } = useStores()
 
   return (
@@ -71,11 +71,11 @@ const AppStack = observer(function AppStack() {
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
       initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
     >
-      {isAuthenticated && hasGroup ? (
+      {isAuthenticated && hasGroup && isValidated ? (
         <>
           <Stack.Screen name="Main" component={MainNavigator} />
         </>
-      ) : isAuthenticated && !hasGroup ? (
+      ) : isAuthenticated && !hasGroup && isValidated ? (
         <>
           <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
 

@@ -1,38 +1,41 @@
 import * as React from "react"
 import {
   Image,
+  ImageRequireSource,
   ImageStyle,
   StyleProp,
-  TextStyle,
   TouchableOpacity,
   TouchableOpacityProps,
   ViewStyle,
 } from "react-native"
 import { observer } from "mobx-react-lite"
-import { colors, spacing, typography } from "app/theme"
-import { Text } from "app/components/Text"
-import { getLoadImage } from "app/constants/images"
+import { colors, spacing } from "app/theme"
 
-export interface ImageSelectProps extends TouchableOpacityProps {
+export interface AvatarSelectProps extends TouchableOpacityProps {
   /**
    * An optional style override useful for padding & margin.
    */
   style?: StyleProp<ViewStyle>
 
-  label: string
+  avatar: ImageRequireSource
+
+  selected?: boolean
 }
 
 /**
  * Describe your component here
  */
-export const ImageSelect = observer(function ImageSelect(props: ImageSelectProps) {
-  const { style, label, onPress } = props
+export const AvatarSelect = observer(function AvatarSelect(props: AvatarSelectProps) {
+  const { style, avatar, selected, onPress } = props
   const $styles = [$container, style]
 
   return (
     <TouchableOpacity onPress={onPress} style={$styles}>
-      <Image style={$imageStyle} source={getLoadImage(label)} />
-      <Text style={$text} text={label}></Text>
+      {selected ? (
+        <Image style={$selectedImageStyle} source={avatar} />
+      ) : (
+        <Image style={$imageStyle} source={avatar} />
+      )}
     </TouchableOpacity>
   )
 })
@@ -48,10 +51,12 @@ const $imageStyle: StyleProp<ImageStyle> = {
   borderWidth: 1,
   width: 80,
   height: 80,
+  opacity: 0.5,
 }
 
-const $text: TextStyle = {
-  fontFamily: typography.primary.normal,
-  fontSize: 14,
-  color: colors.palette.secondary500,
+const $selectedImageStyle: StyleProp<ImageStyle> = {
+  borderWidth: 4,
+  borderColor: colors.palette.primary700,
+  width: 80,
+  height: 80,
 }

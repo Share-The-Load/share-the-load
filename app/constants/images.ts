@@ -1,6 +1,6 @@
 import { ImageRequireSource } from "react-native"
 
-const AVATARS = [
+export const AVATARS = [
     require("../../assets/images/avatars/avatar_1.png"),
     require("../../assets/images/avatars/avatar_2.png"),
     require("../../assets/images/avatars/avatar_3.png"),
@@ -24,13 +24,14 @@ const LOADS = [
 ]
 
 
-const GROUPS = [
+export const GROUPS = [
     require("../../assets/images/groups/group_1.png"),
     require("../../assets/images/groups/group_2.png"),
     require("../../assets/images/groups/group_3.png"),
     require("../../assets/images/groups/group_4.png"),
     require("../../assets/images/groups/group_5.png"),
     require("../../assets/images/groups/group_6.png"),
+    require("../../assets/images/groups/group_7.png"),
 ]
 
 export function getGroupImage(groupIndex: number | undefined): ImageRequireSource {

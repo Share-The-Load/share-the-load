@@ -7,7 +7,7 @@ export const GroupStoreModel = types
   .model("GroupStore")
   .props({
     searchedGroups: types.array(GroupModel),
-    yourGroup: types.maybeNull(GroupModel),
+    yourGroup: types.maybe(GroupModel),
   })
   .actions(withSetPropAction)
   .actions((store) => ({
@@ -48,12 +48,12 @@ export const GroupStoreModel = types
     async leaveGroup() {
       const response = await api.leaveGroup()
       if (response.kind === "ok") {
-        store.setProp("yourGroup", null)
+        store.setProp("yourGroup", undefined)
       } else {
         throw new Error(`Error leaving group: ${JSON.stringify(response)}`)
       }
     },
-    async removeMember(memberId: number) {
+    async removeMember(memberId: number | undefined) {
       const response = await api.removeMember(memberId)
       if (response.kind === "ok") {
         store.yourGroup?.removeMember(memberId)
@@ -71,7 +71,9 @@ export const GroupStoreModel = types
     },
     async getLoads() {
       const response = await api.getLoadsHome()
+      console.log(`❗️❗️❗️ response`, response)
       if (response.kind === "ok" && response.days) {
+
         store.yourGroup?.addDays(response.days)
       }
       else {
@@ -84,6 +86,31 @@ export const GroupStoreModel = types
         return response
       } else {
         throw new Error(`Error scheduling loads: ${JSON.stringify(response)}`)
+      }
+    },
+    async deleteLoad(loadId: number) {
+      const response = await api.deleteLoad(loadId)
+      if (response.kind === "ok") {
+        return response
+      } else {
+        throw new Error(`Error deleting load: ${JSON.stringify(response)}`)
+      }
+    },
+    async editGroup(groupName: string, slogan: string, avatar_id: number, passcode: string | undefined) {
+      const response = await api.editGroup(groupName, slogan, avatar_id, passcode)
+      if (response.kind === "ok") {
+        return response
+      } else {
+        throw new Error(`Error editing group: ${JSON.stringify(response)}`)
+      }
+    },
+    async removeGroupPasscode() {
+      const response = await api.removeGroupPasscode()
+      if (response.kind === "ok") {
+        store.yourGroup?.removePasscode()
+        return response
+      } else {
+        throw new Error(`Error removing group passcode: ${JSON.stringify(response)}`)
       }
     }
   }))
@@ -100,13 +127,10 @@ export const GroupStoreModel = types
     get yourGroupId() {
       return store.yourGroup?.group_id
     },
-
     get hasLoads() {
-      const hasALoad = store.yourGroup?.groupLoadDays.some((day) => day.loads.length > 0)
+      const hasALoad = store?.yourGroup?.groupLoadDays?.some((day) => day.loads.length > 0)
       return hasALoad
     }
-  }))
-  .actions((store) => ({
   }))
 
 export interface GroupStore extends Instance<typeof GroupStoreModel> { }
