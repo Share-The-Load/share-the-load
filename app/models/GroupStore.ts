@@ -2,6 +2,7 @@ import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { api } from "../services/api"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { GroupModel } from "./Group"
+import _ from "lodash"
 
 export const GroupStoreModel = types
   .model("GroupStore")
@@ -40,7 +41,11 @@ export const GroupStoreModel = types
     async getGroupDetails(groupId: number | undefined) {
       const response = await api.getGroupDetails(groupId)
       if (response.kind === "ok") {
+        const loads = _.cloneDeep(store.yourGroup?.groupLoadDays)
         store.setProp("yourGroup", response.group)
+        if (loads) {
+          store.yourGroup?.addDays(loads)
+        }
       } else {
         throw new Error(`Error getting group details: ${JSON.stringify(response)}`)
       }
@@ -71,9 +76,7 @@ export const GroupStoreModel = types
     },
     async getLoads() {
       const response = await api.getLoadsHome()
-      console.log(`❗️❗️❗️ response`, response)
       if (response.kind === "ok" && response.days) {
-
         store.yourGroup?.addDays(response.days)
       }
       else {
@@ -112,6 +115,9 @@ export const GroupStoreModel = types
       } else {
         throw new Error(`Error removing group passcode: ${JSON.stringify(response)}`)
       }
+    },
+    updateUserMemberAvatar(avatar_id: number, user_id: number) {
+      store.yourGroup?.members.find((m) => m.user_id === user_id)?.updateAvatar(avatar_id)
     }
   }))
   .views((store) => ({

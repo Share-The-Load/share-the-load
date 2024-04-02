@@ -67,15 +67,16 @@ function App(props: AppProps) {
   } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
   const {
-    authenticationStore: { validateAndRefreshToken },
+    authenticationStore: { validateAndRefreshToken, setIsValidated },
   } = useStores()
 
   const [areFontsLoaded] = useFonts(customFontsToLoad)
 
-  const { rehydrated } = useInitialRootStore(() => {
+  const { rehydrated } = useInitialRootStore(async () => {
     // This runs after the root store has been initialized and rehydrated.
 
-    validateAndRefreshToken()
+    setIsValidated(false)
+    await validateAndRefreshToken()
 
     // If your initialization scripts run very fast, it's good to show the splash screen for just a bit longer to prevent flicker.
     // Slightly delaying splash screen hiding for better UX; can be customized or removed as needed,

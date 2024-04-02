@@ -8,15 +8,28 @@ import {
   RefreshControl,
   Alert,
   ScrollView,
+  Dimensions,
 } from "react-native"
 import Modal from "react-native-modal"
 import { MainTabScreenProps } from "app/navigators"
-import { Button, Card, Icon, ImageSelect, ListItem, Screen, Text, Toggle } from "app/components"
+import {
+  AutoImage,
+  Button,
+  Card,
+  Icon,
+  ImageSelect,
+  ListItem,
+  Screen,
+  Text,
+  Toggle,
+} from "app/components"
 import { colors, spacing } from "../theme"
 import { useStores } from "../models"
 import { getRandomNoLoadMessage } from "app/constants/noLoadMessages"
 import { getLoadImage } from "app/constants/images"
 import { observer } from "mobx-react-lite"
+import { he } from "date-fns/locale"
+var { height } = Dimensions.get("window")
 
 const stlLogo = require("../../assets/images/logo.png")
 const oysterLogo = require("../../assets/images/oyster.png")
@@ -82,7 +95,6 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
         getLoads()
           .catch((error) => console.error("Error getting loads", error))
           .then(() => {
-            console.log(`❗️❗️❗️ fetched loads after delete`)
             setRefreshing(false)
           })
       })
@@ -140,29 +152,33 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
                           />
                         }
                         RightComponent={
-                          <Icon
-                            icon="trash"
-                            size={24}
-                            color={colors.palette.angry100}
-                            onPress={() => {
-                              Alert.alert(
-                                "Delete Load",
-                                `Risk having to turn those undies inside out?`,
-                                [
-                                  {
-                                    text: "Cancel",
-                                    onPress: () => console.log("Cancel Pressed"),
-                                    style: "cancel",
-                                  },
-                                  {
-                                    text: "Delete",
-                                    onPress: () => deleteLoadFunction(load?.load_id),
-                                  },
-                                ],
-                                { cancelable: false },
-                              )
-                            }}
-                          />
+                          <>
+                            {load.loadMember.user_id === userId && (
+                              <Icon
+                                icon="trash"
+                                size={24}
+                                color={colors.palette.angry100}
+                                onPress={() => {
+                                  Alert.alert(
+                                    "Delete Load",
+                                    `Risk having to turn those undies inside out?`,
+                                    [
+                                      {
+                                        text: "Cancel",
+                                        onPress: () => console.log("Cancel Pressed"),
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "Delete",
+                                        onPress: () => deleteLoadFunction(load?.load_id),
+                                      },
+                                    ],
+                                    { cancelable: false },
+                                  )
+                                }}
+                              />
+                            )}
+                          </>
                         }
                       />
                     ))}
@@ -314,10 +330,10 @@ const $welcomeLogo: ImageStyle = {
 }
 
 const $oyster: ImageStyle = {
-  height: 400,
-  width: "100%",
   marginBottom: spacing.sm,
   marginTop: spacing.sm,
+  height: height - 450,
+  width: "100%",
 }
 
 const $button: ViewStyle = {

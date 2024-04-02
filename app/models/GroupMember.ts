@@ -20,13 +20,16 @@ export const GroupMemberModel = types
   .actions(withSetPropAction)
   .views((self) => ({
     get profileTitle() {
-      if (self.loads === 0) return "No Load Joe"
-      return Titles.reverse().find((title) =>
-        self.loads >= title.loads
-      )?.title
+      if (self.loads < 1) return "No Load Joe";
+      const title = Titles.find((t) => self.loads < t.loads)?.title;
+      return title || Titles[Titles.length - 1].title;
     }
   })) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => ({
+    updateAvatar(avatar: number) {
+      self.avatar_id = avatar
+    }
+  })) // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface GroupMember extends Instance<typeof GroupMemberModel> { }
 export interface GroupMemberSnapshotOut extends SnapshotOut<typeof GroupMemberModel> { }

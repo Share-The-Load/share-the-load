@@ -21,7 +21,6 @@ export const UserStoreModel = types
       if (response.kind === "ok") {
         self.setProp("user", response.profile)
       } else {
-        console.log(`❗️❗️❗️ response`, response)
         console.error(`Error fetching profile: ${JSON.stringify(response)}`)
       }
     },

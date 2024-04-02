@@ -1,9 +1,9 @@
-import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+import React, { FC, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import { Alert, TextInput, TextStyle, ViewStyle } from "react-native"
 import { AppStackScreenProps, goBack } from "app/navigators"
-import { Icon, Screen, Text, TextField, Button } from "app/components"
-import { colors, spacing } from "app/theme"
+import { Screen, Text, TextField, Button } from "app/components"
+import { spacing } from "app/theme"
 import { useHeader } from "app/utils/useHeader"
 import axios from "app/utils/axios"
 import { useStores } from "app/models"
@@ -31,14 +31,20 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
   const usernameError = isSubmitted ? registerUsernameValidationError() : ""
 
   const {
-    authenticationStore: { setAuthToken, setRefreshToken, distributeAuthToken, setUserId },
+    authenticationStore: {
+      setAuthToken,
+      setRefreshToken,
+      distributeAuthToken,
+      setUserId,
+      setIsValidated,
+    },
   } = useStores()
 
   useEffect(() => {
     // Here is where you could fetch credentials from keychain or storage
     // and pre-fill the form fields.
-    setRegisterEmail("brettstrouse@gmail.com")
-    setRegisterPassword("bandit")
+    setRegisterEmail("")
+    setRegisterPassword("")
 
     // Return a "cleanup" function that React will run when the component unmounts
     return () => {
@@ -103,6 +109,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
               setAuthToken(res.data.user.token)
               setRefreshToken(res.data.user.refreshToken)
               setUserId(res.data.user.userId)
+              setIsValidated(true)
               distributeAuthToken()
             })
             .catch((err) => {

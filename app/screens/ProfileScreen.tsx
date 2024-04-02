@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { ActivityIndicator, TextStyle, View, ViewStyle, Image, ScrollView } from "react-native"
+import { TextStyle, View, ViewStyle, Image, ScrollView } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
-import { AvatarSelect, Button, ListItem, Screen, Text, TextField, Toggle } from "app/components"
+import { AvatarSelect, Button, ListItem, Screen, Text, TextField } from "app/components"
 import { colors, spacing } from "app/theme"
 import { useStores } from "app/models"
 
@@ -16,11 +16,10 @@ interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen() {
   const {
-    authenticationStore: { logout, distributeAuthToken },
+    authenticationStore: { logout, distributeAuthToken, userId },
     userStore: { getProfile, updateLoadTime, updatePreference, editProfile, profile },
+    groupStore: { updateUserMemberAvatar },
   } = useStores()
-
-  const [isLoading, setIsLoading] = useState(false)
 
   const [isEditing, setIsEditing] = useState(false)
   const [email, setEmail] = useState(profile?.email || "")
@@ -81,14 +80,16 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
     if (registerEmailValidationError()) return
     if (registerPasswordValidationError()) return
     editProfile(email, newPassword, avatar)
-      .then(() => setIsEditing(!isEditing))
+      .then(() => {
+        //update group member
+        updateUserMemberAvatar(avatar, userId || 0)
+        setIsEditing(!isEditing)
+      })
       .catch((e) => console.log(e))
   }
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
-      <ActivityIndicator animating={isLoading} size="large" color={colors.palette.accent700} />
-
       <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
         <Image
           style={{ alignSelf: "flex-start", marginEnd: spacing.md, width: 100, height: 100 }}
@@ -104,9 +105,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         </View>
       </View>
       <Button preset="small" text="Edit Profile" onPress={() => setIsEditing(true)} />
-
       <Text preset="subheading" style={{ marginTop: spacing.md }} text="Preferences" />
-
       <ListItem
         text="Load Time"
         RightComponent={
@@ -139,7 +138,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           />
         }
       />
-
       {profile?.preferences.map((pref) => (
         <ListItem
           key={pref?.day}
@@ -177,11 +175,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           }
         />
       ))}
-
       <View style={$buttonContainer}>
         <Button preset="filled" tx="common.logOut" onPress={logout} />
       </View>
-
       <Modal
         isVisible={isEditing}
         backdropColor="white"
@@ -274,6 +270,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
 })
 
 const $container: ViewStyle = {
+  paddingTop: spacing.md,
   paddingBottom: spacing.md,
   paddingHorizontal: spacing.lg,
 }

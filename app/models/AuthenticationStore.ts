@@ -45,16 +45,13 @@ export const AuthenticationStoreModel = types
       if (!store.authToken || store.validated) {
         return
       }
-      console.log(`❗️❗️❗️ Checking Auth Token`, store.authToken)
       await api.validateToken(store.authToken).catch(async (error) => {
         console.error(`Error validating token: ${error}`)
-        console.log(`❗️❗️❗️ REFRESH TOKEN`, store.refreshToken)
         await api.refreshToken(store.refreshToken).catch((error: any) => {
           console.error(`Error refreshing token: ${error}`)
           store.validated = false
           this.logout()
         }).then((response: any) => {
-          console.log(`❗️❗️❗️ response REFRESH`, response)
           this.setAuthToken(response.token)
           this.setRefreshToken(response.refreshToken)
           this.setIsValidated(true)
@@ -62,7 +59,6 @@ export const AuthenticationStoreModel = types
         })
       }).then((response: any) => {
         api.apisauce.setHeader("Authorization", `Bearer ${store.authToken}`);
-        console.log(`❗️❗️❗️ TOKEN HAS BEEN VALIDATED. WE"RE GOOD`, response)
         this.setIsValidated(true)
       })
     },
