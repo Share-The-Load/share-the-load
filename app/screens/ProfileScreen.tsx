@@ -1,16 +1,17 @@
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { TextStyle, View, ViewStyle, Image, ScrollView } from "react-native"
+import { TextStyle, View, ViewStyle, Image, ScrollView, Platform } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { AvatarSelect, Button, ListItem, Screen, Text, TextField } from "app/components"
 import { colors, spacing } from "app/theme"
 import { useStores } from "app/models"
 
 import RNPickerSelect from "react-native-picker-select"
-import RNDateTimePicker from "@react-native-community/datetimepicker"
+import RNDateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker"
 import { set } from "date-fns"
 import { AVATARS, getAvatarImage } from "app/constants/images"
 import Modal from "react-native-modal"
+import moment from "moment"
 
 interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
@@ -64,6 +65,8 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
   }, [])
 
   function callUpdateLoadTime(loadTime: number) {
+    if (loadTime === profile?.load_time) return
+    if (loadTime == null) return
     updateLoadTime(loadTime)
       .then(() => console.log("Updated Load Time"))
       .catch((e) => console.log(e))
@@ -86,6 +89,24 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         setIsEditing(!isEditing)
       })
       .catch((e) => console.log(e))
+  }
+
+  const openPreferencePicker = (pref: any, startOrEnd: string) => {
+    DateTimePickerAndroid.open({
+      value: createDate(pref?.[startOrEnd]),
+      mode: "time",
+      minuteInterval: 30,
+      onChange: (event, newTime) => {
+        const time = formatTime(newTime)
+        if (startOrEnd === "start_time")
+          callUpdatePrefTime(pref?.preference_id, time, pref?.end_time)
+        else callUpdatePrefTime(pref?.preference_id, pref?.start_time, time)
+      },
+    })
+  }
+
+  const formatAndroidButtonTime = (time: string) => {
+    return moment(time, "HH:mm:ss").format("h:mm a")
   }
 
   return (
@@ -125,8 +146,23 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               inputIOS: {
                 fontSize: 18,
               },
+              inputAndroidContainer: {
+                alignSelf: "center",
+                backgroundColor: colors.palette.accent100,
+                borderRadius: 10,
+                width: 120,
+                height: 40,
+                justifyContent: "center",
+                alignContent: "center",
+                alignItems: "center",
+              },
+              inputAndroid: {
+                fontSize: 18,
+                color: colors.palette.accent800,
+              },
             }}
             value={profile?.load_time}
+            useNativeAndroidPickerStyle={false}
             items={[
               { label: "30 minutes", value: 30 },
               { label: "60 minutes", value: 60 },
@@ -152,31 +188,58 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
                 flexDirection: "row",
               }}
             >
-              <RNDateTimePicker
-                mode="time"
-                minuteInterval={30}
-                value={createDate(pref?.start_time)}
-                onChange={(event, newStartTime) => {
-                  const time = formatTime(newStartTime)
-                  callUpdatePrefTime(pref?.preference_id, time, pref?.end_time)
-                }}
-              />
-              <Text style={{ marginTop: spacing.xxs, marginLeft: spacing.xs }} text={`-`} />
-              <RNDateTimePicker
-                mode="time"
-                minuteInterval={30}
-                value={createDate(pref?.end_time)}
-                onChange={(event, newEndTime) => {
-                  const newTime = formatTime(newEndTime)
-                  callUpdatePrefTime(pref?.preference_id, pref?.start_time, newTime)
-                }}
-              />
+              {Platform.OS == "ios" ? (
+                <RNDateTimePicker
+                  mode="time"
+                  minuteInterval={30}
+                  value={createDate(pref?.start_time)}
+                  onChange={(event, newStartTime) => {
+                    const time = formatTime(newStartTime)
+                    callUpdatePrefTime(pref?.preference_id, time, pref?.end_time)
+                  }}
+                />
+              ) : (
+                <Button
+                  style={$prefButton}
+                  preset="small"
+                  text={formatAndroidButtonTime(pref?.start_time)}
+                  onPress={() => openPreferencePicker(pref, "start_time")}
+                  textStyle={{ color: colors.palette.accent800 }}
+                />
+              )}
+              <Text style={{ marginTop: spacing.xxs, marginHorizontal: spacing.xs }} text={`-`} />
+
+              {Platform.OS == "ios" ? (
+                <RNDateTimePicker
+                  mode="time"
+                  minuteInterval={30}
+                  value={createDate(pref?.end_time)}
+                  onChange={(event, newEndTime) => {
+                    const newTime = formatTime(newEndTime)
+                    callUpdatePrefTime(pref?.preference_id, pref?.start_time, newTime)
+                  }}
+                />
+              ) : (
+                <Button
+                  preset="small"
+                  style={$prefButton}
+                  text={formatAndroidButtonTime(pref?.end_time)}
+                  onPress={() => openPreferencePicker(pref, "end_time")}
+                  textStyle={{ color: colors.palette.accent800 }}
+                />
+              )}
             </View>
           }
         />
       ))}
       <View style={$buttonContainer}>
-        <Button preset="filled" tx="common.logOut" onPress={logout} />
+        <Button preset="default" tx="common.logOut" onPress={logout} />
+        <Button
+          style={{ marginVertical: spacing.sm }}
+          preset="filled"
+          text="Delete Account"
+          onPress={() => console.log("Back")}
+        />
       </View>
       <Modal
         isVisible={isEditing}
@@ -273,6 +336,11 @@ const $container: ViewStyle = {
   paddingTop: spacing.md,
   paddingBottom: spacing.md,
   paddingHorizontal: spacing.lg,
+}
+
+const $prefButton: ViewStyle = {
+  // marginHorizontal: spacing.xs,
+  backgroundColor: colors.palette.accent100,
 }
 
 const $titleStyle: TextStyle = {
