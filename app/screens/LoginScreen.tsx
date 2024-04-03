@@ -88,6 +88,10 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     navigation.navigate("Register")
   }
 
+  function forgotPassword() {
+    navigation.navigate("ForgotPassword")
+  }
+
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
     () =>
       function PasswordRightAccessory(props: TextFieldAccessoryProps) {
@@ -152,6 +156,13 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
       {loginError && <Text text={loginError} size="sm" weight="light" style={$hint} />}
 
       <Button
+        textStyle={{ color: colors.palette.neutral400, marginBottom: spacing.lg }}
+        preset="clear"
+        text="Forgot Password"
+        onPress={forgotPassword}
+      />
+
+      <Button
         testID="login-button"
         tx="loginScreen.tapToSignIn"
         style={$tapButton}
@@ -193,7 +204,7 @@ const $hint: TextStyle = {
 }
 
 const $textField: ViewStyle = {
-  marginBottom: spacing.lg,
+  marginBottom: spacing.md,
 }
 
 const $tapButton: ViewStyle = {

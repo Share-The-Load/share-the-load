@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { TextStyle, View, ViewStyle, Image, ScrollView, Platform } from "react-native"
+import { TextStyle, View, ViewStyle, Image, ScrollView, Platform, Alert } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { AvatarSelect, Button, ListItem, Screen, Text, TextField } from "app/components"
 import { colors, spacing } from "app/theme"
@@ -18,7 +18,14 @@ interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen() {
   const {
     authenticationStore: { logout, distributeAuthToken, userId },
-    userStore: { getProfile, updateLoadTime, updatePreference, editProfile, profile },
+    userStore: {
+      getProfile,
+      updateLoadTime,
+      updatePreference,
+      editProfile,
+      deleteAccount,
+      profile,
+    },
     groupStore: { updateUserMemberAvatar },
   } = useStores()
 
@@ -86,9 +93,33 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
       .then(() => {
         //update group member
         updateUserMemberAvatar(avatar, userId || 0)
+        setEmail(email)
+        setNewPassword("")
+        setAvatar(avatar)
         setIsEditing(!isEditing)
       })
       .catch((e) => console.log(e))
+  }
+
+  function callDeleteAccount() {
+    Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        onPress: () => {
+          deleteAccount()
+            .then((response: any) => {
+              console.log(response)
+              Alert.alert("Success", "Account will be deleted in 24-48 hours.")
+              logout()
+            })
+            .catch((error: any) => {
+              Alert.alert("Error", "An error occurred. Please try again later")
+              console.log(error)
+            })
+        },
+      },
+    ])
   }
 
   const openPreferencePicker = (pref: any, startOrEnd: string) => {
@@ -238,7 +269,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           style={{ marginVertical: spacing.sm }}
           preset="filled"
           text="Delete Account"
-          onPress={() => console.log("Back")}
+          onPress={callDeleteAccount}
         />
       </View>
       <Modal

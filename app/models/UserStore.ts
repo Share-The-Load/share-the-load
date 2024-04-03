@@ -50,9 +50,13 @@ export const UserStoreModel = types
         throw new Error(`Error updating profile: ${JSON.stringify(response)}`)
       }
     },
-    goToProfile() {
-      navigate("Profile")
-      console.log("goToProfile")
+    async deleteAccount() {
+      const response = await api.deleteAccount()
+      if (response.kind === "ok") {
+        return response
+      } else {
+        throw new Error(`Error deleting account: ${JSON.stringify(response)}`)
+      }
     }
   })) // eslint-disable-line @typescript-eslint/no-unused-vars
 

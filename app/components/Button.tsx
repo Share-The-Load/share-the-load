@@ -213,6 +213,18 @@ const $viewPresets = {
     overflow: "hidden",
     backgroundColor: colors.palette.secondary300,
   } as StyleProp<ViewStyle>,
+
+  clear: {
+    minHeight: 25,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: spacing.xs,
+    overflow: "hidden",
+    backgroundColor: "none",
+  } as StyleProp<ViewStyle>,
 }
 
 const $textPresets: Record<Presets, StyleProp<TextStyle>> = {
@@ -233,6 +245,18 @@ const $textPresets: Record<Presets, StyleProp<TextStyle>> = {
       color: colors.palette.neutral100,
     },
   ],
+  clear: [
+    {
+      fontSize: 16,
+      lineHeight: 20,
+      fontFamily: typography.primary.medium,
+      textAlign: "center",
+      flexShrink: 1,
+      flexGrow: 0,
+      zIndex: 2,
+      color: colors.palette.accent500,
+    },
+  ],
 }
 
 const $pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {
@@ -242,6 +266,7 @@ const $pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {
   primary: { backgroundColor: colors.palette.neutral400 },
   secondary: { backgroundColor: colors.palette.neutral400 },
   small: { backgroundColor: colors.palette.neutral400 },
+  clear: { backgroundColor: "none" },
 }
 
 const $pressedTextPresets: Record<Presets, StyleProp<TextStyle>> = {
@@ -251,4 +276,5 @@ const $pressedTextPresets: Record<Presets, StyleProp<TextStyle>> = {
   primary: { opacity: 0.9 },
   secondary: { opacity: 0.9 },
   small: { opacity: 0.9 },
+  clear: { opacity: 0.9 },
 }
