@@ -8,7 +8,7 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from "react-native"
-import { observer } from "mobx-react-lite"
+
 import { colors, spacing, typography } from "app/theme"
 import { Text } from "app/components/Text"
 import { getLoadImage } from "app/constants/images"
@@ -25,7 +25,7 @@ export interface ImageSelectProps extends TouchableOpacityProps {
 /**
  * Describe your component here
  */
-export const ImageSelect = observer(function ImageSelect(props: ImageSelectProps) {
+export const ImageSelect = function ImageSelect(props: ImageSelectProps) {
   const { style, label, onPress } = props
   const $styles = [$container, style]
 
@@ -35,7 +35,7 @@ export const ImageSelect = observer(function ImageSelect(props: ImageSelectProps
       <Text style={$text} text={label}></Text>
     </TouchableOpacity>
   )
-})
+}
 
 const $container: ViewStyle = {
   justifyContent: "center",

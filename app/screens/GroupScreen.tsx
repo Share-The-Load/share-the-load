@@ -1,19 +1,18 @@
 import React, { FC, useRef, useState } from "react"
-import { observer } from "mobx-react-lite"
 import { Alert, TextStyle, ViewStyle, TextInput, ActivityIndicator } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { Button, GroupItem, Screen, Text, TextField, Toggle } from "app/components"
 import { spacing } from "app/theme"
-import { Group, useStores } from "app/models"
+import { useAuthStore } from "app/store"
+import { api } from "app/services/api"
+import type { Group } from "app/services/api/api.types"
 
 const MAX_GROUP_NAME_LENGTH = 25
 
 interface GroupScreenProps extends AppStackScreenProps<"Group"> {}
 
-export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_props) {
-  // Pull in one of our MST stores
-  // const { someStore, anotherStore } = useStores()
-  const { groupStore, authenticationStore } = useStores()
+export const GroupScreen: FC<GroupScreenProps> = function GroupScreen(_props) {
+  const { setUserGroupId } = useAuthStore()
   const passcodeInput = useRef<TextInput>(null)
 
   const [groupName, setGroupName] = useState("")
@@ -23,6 +22,8 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
   const [usePasscode, setUsePasscode] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [mode, setMode] = useState(_props.route.params?.mode || "find")
+  const [searchedGroups, setSearchedGroups] = useState<Group[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const groupNameError = hasSubmitted ? createGroupNameValidation() : ""
 
@@ -34,12 +35,17 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
     return ""
   }
 
-  const [isLoading, setIsLoading] = React.useState(false)
-
   function search() {
     setIsLoading(true)
-    groupStore
+    api
       .searchGroupsByName(searchGroupName)
+      .then((response) => {
+        if (response.kind === "ok") {
+          setSearchedGroups(response.groups)
+        } else {
+          setSearchedGroups([])
+        }
+      })
       .catch((e) => console.log(e))
       .finally(() => {
         setIsLoading(false)
@@ -48,16 +54,17 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
   }
 
   function createGroup() {
-    console.log("Create group")
     setHasSubmitted(true)
     if (createGroupNameValidation() != "" || (usePasscode && !passcode)) {
       return
     }
     setIsLoading(true)
-    groupStore
+    api
       .createGroup(groupName, passcode)
-      .then(() => {
-        authenticationStore.setUserGroupId(groupStore.yourGroup?.group_id)
+      .then((response) => {
+        if (response.kind === "ok" && response.group) {
+          setUserGroupId(response.group.group_id)
+        }
       })
       .catch((e) => {
         Alert.alert(
@@ -92,11 +99,12 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
                   text: "Join",
                   onPress: async (passcode) => {
                     setIsLoading(true)
-                    groupStore
+                    api
                       .joinGroup(group.group_id, passcode || "")
-                      .then(() => {
-                        setIsLoading(false)
-                        authenticationStore.setUserGroupId(groupStore.yourGroup?.group_id)
+                      .then((response) => {
+                        if (response.kind === "ok" && response.group) {
+                          setUserGroupId(response.group.group_id)
+                        }
                       })
                       .catch((e) => {
                         Alert.alert("Error", "Wrong Passcode!")
@@ -111,11 +119,12 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
             )
           } else {
             setIsLoading(true)
-            groupStore
+            api
               .joinGroup(group.group_id, "")
-              .then(() => {
-                setIsLoading(false)
-                authenticationStore.setUserGroupId(groupStore.yourGroup?.group_id)
+              .then((response) => {
+                if (response.kind === "ok" && response.group) {
+                  setUserGroupId(response.group.group_id)
+                }
               })
               .catch((e) => {
                 Alert.alert("Error", "Can't Join!")
@@ -162,9 +171,9 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
           <Text preset="heading" text="Groups Found" style={$bottomTitle} />
 
           <ActivityIndicator animating={isLoading} />
-          {groupStore.hasGroups ? (
+          {searchedGroups.length > 0 ? (
             <>
-              {groupStore.searchedGroups.map((group) => (
+              {searchedGroups.map((group) => (
                 <GroupItem
                   key={group.group_id}
                   text={group?.name}
@@ -177,12 +186,11 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
                 />
               ))}
             </>
-          ) : hasSearched && !groupStore.hasGroups ? (
+          ) : hasSearched && searchedGroups.length === 0 ? (
             <Text preset="subheading" text="No groups found!" />
           ) : null}
         </>
       ) : (
-        // Create Group
         <>
           <TextField
             value={groupName}
@@ -231,7 +239,7 @@ export const GroupScreen: FC<GroupScreenProps> = observer(function GroupScreen(_
       )}
     </Screen>
   )
-})
+}
 
 const $container: ViewStyle = {
   paddingTop: spacing.lg + spacing.xl,

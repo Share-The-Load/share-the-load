@@ -28,22 +28,13 @@ export interface ListItemProps extends TouchableOpacityProps {
    */
   bottomSeparator?: boolean
   /**
-   * Text to display if not using `tx` or nested components.
+   * Text to display if not using nested components.
    */
   text?: TextProps["text"]
-  /**
-   * Text which is looked up via i18n.
-   */
-  tx?: TextProps["tx"]
   /**
    * Children components.
    */
   children?: TextProps["children"]
-  /**
-   * Optional options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  txOptions?: TextProps["txOptions"]
   /**
    * Optional text style override.
    */
@@ -116,8 +107,6 @@ export function ListItem(props: ListItemProps) {
     text,
     TextProps,
     topSeparator,
-    tx,
-    txOptions,
     textStyle: $textStyleOverride,
     containerStyle: $containerStyleOverride,
     ...TouchableOpacityProps
@@ -144,7 +133,7 @@ export function ListItem(props: ListItemProps) {
           Component={LeftComponent}
         />
 
-        <Text {...TextProps} tx={tx} text={text} txOptions={txOptions} style={$textStyles}>
+        <Text {...TextProps} text={text} style={$textStyles}>
           {children}
         </Text>
 

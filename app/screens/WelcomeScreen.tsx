@@ -1,8 +1,7 @@
-import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Text } from "app/components"
-import { useStores } from "../models"
+import { useAuthStore } from "../store"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import { useHeader } from "../utils/useHeader"
@@ -12,11 +11,9 @@ const laundryRoom = require("../../assets/images/laundry_room.png")
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
-export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(_props) {
+export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_props) {
   const { navigation } = _props
-  const {
-    authenticationStore: { logout },
-  } = useStores()
+  const logout = useAuthStore((s) => s.logout)
 
   function goNext(mode: "find" | "create") {
     navigation.navigate("Group", { mode })
@@ -24,7 +21,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
 
   useHeader(
     {
-      rightTx: "common.logOut",
+      rightText: "Log Out",
       onRightPress: logout,
     },
     [logout],
@@ -39,23 +36,23 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
         <Text
           testID="welcome-heading"
           style={$welcomeHeading}
-          tx="welcomeScreen.readyForLaunch"
+          text="You're almost ready to launder..."
           preset="heading"
         />
-        <Text tx="welcomeScreen.exciting" preset="subheading" />
+        <Text text="(you can finally wear some clean socks)" preset="subheading" />
       </View>
 
       <View style={[$bottomContainer, $bottomContainerInsets]}>
         <Text
           style={{ color: colors.palette.secondary500 }}
-          tx="welcomeScreen.postscript"
+          text="Time to join the laundry revolution. Click a button below to get started."
           size="md"
         />
         <View>
           <Button
             testID="next-screen-button"
             preset="default"
-            tx="welcomeScreen.letsGo"
+            text="Find Group"
             style={{ marginVertical: spacing.sm }}
             onPress={() => goNext("find")}
           />
@@ -69,7 +66,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
       </View>
     </View>
   )
-})
+}
 
 const $container: ViewStyle = {
   flex: 1,

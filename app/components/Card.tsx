@@ -37,18 +37,9 @@ interface CardProps extends TouchableOpacityProps {
    */
   RightComponent?: ReactElement
   /**
-   * The heading text to display if not using `headingTx`.
+   * The heading text to display.
    */
   heading?: TextProps["text"]
-  /**
-   * Heading text which is looked up via i18n.
-   */
-  headingTx?: TextProps["tx"]
-  /**
-   * Optional heading options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  headingTxOptions?: TextProps["txOptions"]
   /**
    * Style overrides for heading text.
    */
@@ -63,18 +54,9 @@ interface CardProps extends TouchableOpacityProps {
    */
   HeadingComponent?: ReactElement
   /**
-   * The content text to display if not using `contentTx`.
+   * The content text to display.
    */
   content?: TextProps["text"]
-  /**
-   * Content text which is looked up via i18n.
-   */
-  contentTx?: TextProps["tx"]
-  /**
-   * Optional content options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  contentTxOptions?: TextProps["txOptions"]
   /**
    * Style overrides for content text.
    */
@@ -89,18 +71,9 @@ interface CardProps extends TouchableOpacityProps {
    */
   ContentComponent?: ReactElement
   /**
-   * The footer text to display if not using `footerTx`.
+   * The footer text to display.
    */
   footer?: TextProps["text"]
-  /**
-   * Footer text which is looked up via i18n.
-   */
-  footerTx?: TextProps["tx"]
-  /**
-   * Optional footer options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  footerTxOptions?: TextProps["txOptions"]
   /**
    * Style overrides for footer text.
    */
@@ -125,14 +98,8 @@ interface CardProps extends TouchableOpacityProps {
 export function Card(props: CardProps) {
   const {
     content,
-    contentTx,
-    contentTxOptions,
     footer,
-    footerTx,
-    footerTxOptions,
     heading,
-    headingTx,
-    headingTxOptions,
     ContentComponent,
     HeadingComponent,
     FooterComponent,
@@ -151,9 +118,9 @@ export function Card(props: CardProps) {
 
   const preset: Presets = props.preset ?? "default"
   const isPressable = !!WrapperProps.onPress
-  const isHeadingPresent = !!(HeadingComponent || heading || headingTx)
-  const isContentPresent = !!(ContentComponent || content || contentTx)
-  const isFooterPresent = !!(FooterComponent || footer || footerTx)
+  const isHeadingPresent = !!(HeadingComponent || heading)
+  const isContentPresent = !!(ContentComponent || content)
+  const isFooterPresent = !!(FooterComponent || footer)
 
   const Wrapper = (isPressable ? TouchableOpacity : View) as ComponentType<
     TouchableOpacityProps | ViewProps
@@ -203,8 +170,6 @@ export function Card(props: CardProps) {
               <Text
                 weight="bold"
                 text={heading}
-                tx={headingTx}
-                txOptions={headingTxOptions}
                 {...HeadingTextProps}
                 style={$headingStyle}
               />
@@ -215,8 +180,6 @@ export function Card(props: CardProps) {
               <Text
                 weight="normal"
                 text={content}
-                tx={contentTx}
-                txOptions={contentTxOptions}
                 {...ContentTextProps}
                 style={$contentStyle}
               />
@@ -229,8 +192,6 @@ export function Card(props: CardProps) {
               weight="normal"
               size="xs"
               text={footer}
-              tx={footerTx}
-              txOptions={footerTxOptions}
               {...FooterTextProps}
               style={$footerStyle}
             />

@@ -8,7 +8,7 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from "react-native"
-import { observer } from "mobx-react-lite"
+
 import { colors, spacing } from "app/theme"
 
 export interface AvatarSelectProps extends TouchableOpacityProps {
@@ -25,7 +25,7 @@ export interface AvatarSelectProps extends TouchableOpacityProps {
 /**
  * Describe your component here
  */
-export const AvatarSelect = observer(function AvatarSelect(props: AvatarSelectProps) {
+export const AvatarSelect = function AvatarSelect(props: AvatarSelectProps) {
   const { style, avatar, selected, onPress } = props
   const $styles = [$container, style]
 
@@ -38,7 +38,7 @@ export const AvatarSelect = observer(function AvatarSelect(props: AvatarSelectPr
       )}
     </TouchableOpacity>
   )
-})
+}
 
 const $container: ViewStyle = {
   justifyContent: "center",

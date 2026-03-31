@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from "react-native"
-import { observer } from "mobx-react-lite"
+
 import { colors, spacing } from "app/theme"
 import { Text, TextProps } from "app/components/Text"
 import { Icon } from "./Icon"
@@ -40,7 +40,7 @@ export interface GroupItemProps extends TouchableOpacityProps {
 /**
  * Describe your component here
  */
-export const GroupItem = observer(function GroupItem(props: GroupItemProps) {
+export const GroupItem = function GroupItem(props: GroupItemProps) {
   const {
     bottomSeparator,
     height = 56,
@@ -79,7 +79,7 @@ export const GroupItem = observer(function GroupItem(props: GroupItemProps) {
       </TouchableOpacity>
     </View>
   )
-})
+}
 
 const $textContainer: ViewStyle = {
   justifyContent: "center",

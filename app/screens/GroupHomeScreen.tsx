@@ -1,31 +1,29 @@
 import React, { FC, useEffect, useState } from "react"
-import { observer } from "mobx-react-lite"
 import { View, ViewStyle, Image, TextStyle, Alert, ScrollView } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { AvatarSelect, Button, Card, Icon, Screen, Text, TextField, Toggle } from "app/components"
-import { useStores } from "app/models"
+import { useAuthStore } from "app/store"
+import { api } from "app/services/api"
 import { colors, spacing } from "app/theme"
 import { GROUPS, getAvatarImage, getGroupImage } from "app/constants/images"
+import { Titles } from "app/constants/titles"
 import Modal from "react-native-modal"
+import type { Group } from "app/services/api/api.types"
 
 const MAX_GROUP_NAME_LENGTH = 25
 
+function getMemberTitle(loads: number) {
+  if (loads < 1) return "No Load Joe"
+  const title = Titles.find((t) => loads < t.loads)?.title
+  return title || Titles[Titles.length - 1].title
+}
+
 interface GroupHomeScreenProps extends AppStackScreenProps<"GroupHome"> {}
 
-export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function GroupHomeScreen() {
-  const {
-    authenticationStore: { userGroupId, userId, setUserGroupId, distributeAuthToken },
-    groupStore: {
-      getGroupDetails,
-      leaveGroup,
-      removeMember,
-      fetchNewSlogan,
-      editGroup,
-      removeGroupPasscode,
-      yourGroup,
-    },
-  } = useStores()
+export const GroupHomeScreen: FC<GroupHomeScreenProps> = function GroupHomeScreen() {
+  const { userGroupId, userId, setUserGroupId, distributeAuthToken } = useAuthStore()
 
+  const [yourGroup, setYourGroup] = useState<Group | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [groupName, setGroupName] = useState("")
   const [passcode, setPasscode] = useState("")
@@ -43,17 +41,19 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
     return ""
   }
 
+  async function fetchGroupDetails() {
+    const response = await api.getGroupDetails(userGroupId)
+    if (response.kind === "ok" && response.group) {
+      setYourGroup(response.group)
+      setGroupName(response.group.name)
+      setSlogan(response.group.slogan)
+      setAvatar(response.group.avatar_id)
+    }
+  }
+
   useEffect(() => {
     distributeAuthToken()
-    getGroupDetails(userGroupId)
-      .catch((e) => console.log(e))
-      .then(() => {
-        setGroupName(yourGroup?.name || "")
-        setSlogan(yourGroup?.slogan || "")
-        setAvatar(yourGroup?.avatar_id || 1)
-        console.log("Group Screen loaded")
-      })
-    return () => console.log("ProfileScreen unmounted")
+    fetchGroupDetails().catch((e) => console.log(e))
   }, [])
 
   async function removeMemberFunction(memberId: number | undefined) {
@@ -65,13 +65,25 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
       {
         text: "Remove",
         onPress: () => {
-          removeMember(memberId).catch((e) => console.log(e))
+          api.removeMember(memberId)
+            .then(() => {
+              setYourGroup((prev) => {
+                if (!prev) return prev
+                return {
+                  ...prev,
+                  members: prev.members.filter((m) => m.user_id !== memberId),
+                }
+              })
+            })
+            .catch((e) => console.log(e))
         },
       },
     ])
   }
 
   async function leaveGroupFunction() {
+    const transferMember = yourGroup && yourGroup.members.length > 1 ? yourGroup.members[1] : null
+
     await Alert.alert("Leave Group", "Are you sure? I sense dirty clothes in your future...", [
       {
         text: "Cancel",
@@ -80,21 +92,16 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
       {
         text: "Leave",
         onPress: async () => {
-          console.log("Leave group")
-          if (yourGroup?.owner_id === userId && yourGroup?.hasMoreThanOneMember) {
+          if (yourGroup?.owner_id === userId && (yourGroup?.members?.length ?? 0) > 1 && transferMember) {
             await Alert.alert(
               "Group ownership",
-              `You are the owner of this group. Group ownership will pass to ${yourGroup?.transferMember?.username}`,
+              `You are the owner of this group. Group ownership will pass to ${transferMember.username}`,
               [
-                {
-                  text: "Cancel",
-                  style: "cancel",
-                },
+                { text: "Cancel", style: "cancel" },
                 {
                   text: "Leave",
-                  onPress: async () => {
-                    console.log("Leave group")
-                    leaveGroup()
+                  onPress: () => {
+                    api.leaveGroup()
                       .then(() => setUserGroupId(undefined))
                       .catch((e) => console.log(e))
                   },
@@ -102,7 +109,7 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
               ],
             )
           } else {
-            leaveGroup()
+            api.leaveGroup()
               .then(() => setUserGroupId(undefined))
               .catch((e) => console.log(e))
           }
@@ -112,41 +119,35 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
   }
 
   function fetchNewSloganFunction() {
-    fetchNewSlogan()
-      .catch((e) => console.log(e))
-      .then((newSlogan: string | void | undefined) => {
-        if (typeof newSlogan === "string") {
-          setSlogan(newSlogan)
+    api.fetchNewSlogan()
+      .then((response) => {
+        if (response.kind === "ok" && response.slogan) {
+          setSlogan(response.slogan)
         }
       })
+      .catch((e) => console.log(e))
   }
 
   function submitEditGroup() {
-    editGroup(groupName, slogan, avatar, passcode)
-      .then(() => {
-        getGroupDetails(userGroupId)
-          .catch((e) => console.log(e))
-          .then(() => {
-            setGroupName(yourGroup?.name || "")
-            setSlogan(yourGroup?.slogan || "")
-            setAvatar(yourGroup?.avatar_id || 1)
-          })
-      })
+    api.editGroup(groupName, slogan, avatar, passcode)
+      .then(() => fetchGroupDetails())
       .catch((e) => console.log(e))
   }
 
   function disablePasscode() {
     Alert.alert("Disable Passcode", "Are you sure you want to disable the passcode?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
+      { text: "Cancel", style: "cancel" },
       {
         text: "Disable",
         onPress: () => {
           setPasscode("")
           setUsePasscode(false)
-          removeGroupPasscode()
+          api.removeGroupPasscode()
+            .then(() => {
+              setYourGroup((prev) =>
+                prev ? { ...prev, hasPasscode: false, passcode: "" } : prev,
+              )
+            })
         },
       },
     ])
@@ -181,7 +182,7 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
         <Card
           key={member?.user_id}
           heading={member?.username}
-          content={`${member.profileTitle}`}
+          content={getMemberTitle(member.loads)}
           footer={`${member?.loads} loads shared`}
           style={{
             alignContent: "center",
@@ -341,7 +342,6 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
               text="Save"
               style={$button}
               onPress={() => {
-                console.log("Modal has been closed.")
                 submitEditGroup()
                 setIsEditing(!isEditing)
               }}
@@ -352,7 +352,6 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
               preset="default"
               text="Cancel"
               onPress={() => {
-                console.log("Modal has been closed.")
                 setIsEditing(!isEditing)
                 setGroupName(yourGroup?.name || "")
                 setSlogan(yourGroup?.slogan || "")
@@ -366,7 +365,7 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> = observer(function Group
       </Modal>
     </Screen>
   )
-})
+}
 
 const $container: ViewStyle = {
   paddingBottom: spacing.xxl,

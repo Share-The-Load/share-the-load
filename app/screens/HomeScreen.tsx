@@ -13,7 +13,6 @@ import {
 import Modal from "react-native-modal"
 import { MainTabScreenProps } from "app/navigators"
 import {
-  AutoImage,
   Button,
   Card,
   Icon,
@@ -24,48 +23,51 @@ import {
   Toggle,
 } from "app/components"
 import { colors, spacing } from "../theme"
-import { useStores } from "../models"
+import { useAuthStore } from "../store"
+import { api } from "app/services/api"
 import { getRandomNoLoadMessage } from "app/constants/noLoadMessages"
 import { getLoadImage } from "app/constants/images"
-import { observer } from "mobx-react-lite"
-import { he } from "date-fns/locale"
+import type { GroupDay } from "app/services/api/api.types"
+import moment from "moment"
 var { height } = Dimensions.get("window")
 
 const stlLogo = require("../../assets/images/logo.png")
 const oysterLogo = require("../../assets/images/oyster.png")
 
-export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function HomeScreen(_props) {
-  const {
-    groupStore: { getLoads, schedule, deleteLoad, yourGroup, hasLoads },
-    authenticationStore: { distributeAuthToken, userId },
-  } = useStores()
+function formatLoadTime(start_time: string, end_time: string) {
+  const start = moment(start_time).format("h:mm A")
+  const end = moment(end_time).format("h:mm A")
+  return `${start} - ${end}`
+}
+
+export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_props) {
+  const { distributeAuthToken, userId } = useAuthStore()
 
   const [refreshing, setRefreshing] = useState(false)
   const [isScheduling, setIsScheduling] = useState(false)
   const [isUrgent, setIsUrgent] = useState(false)
-
   const [loads, setLoads] = useState([] as any)
+  const [groupLoadDays, setGroupLoadDays] = useState<GroupDay[]>([])
+
+  const hasLoads = groupLoadDays.some((day) => day.loads.length > 0)
+
+  async function fetchLoads() {
+    const response = await api.getLoadsHome()
+    if (response.kind === "ok" && response.days) {
+      setGroupLoadDays(response.days)
+    }
+  }
 
   useEffect(() => {
     distributeAuthToken()
-    console.log("HomeScreen mounted")
-    getLoads()
-      .catch((error) => {
-        getLoads().catch((error) => console.error("Error getting loads", error))
-      })
-      .then(() => {
-        console.log("Loads fetched")
-      })
+    fetchLoads().catch((error) => console.error("Error getting loads", error))
   }, [])
 
   const onRefresh = () => {
     setRefreshing(true)
-    getLoads()
+    fetchLoads()
       .catch((error) => console.error("Error getting loads", error))
-      .then(() => {
-        console.log("Loads fetched")
-        setRefreshing(false)
-      })
+      .finally(() => setRefreshing(false))
   }
 
   function addLoad(loadType: string) {
@@ -75,29 +77,20 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
 
   function scheduleLoad() {
     setRefreshing(true)
-    schedule(loads, isUrgent)
-      .catch((error) => console.error("Error scheduling load", error))
+    api
+      .schedule(loads, isUrgent)
       .then(() => {
-        console.log("Load scheduled")
         setLoads([])
-        getLoads()
-          .catch((error) => console.error("Error getting loads", error))
-          .then(() => {
-            setRefreshing(false)
-          })
+        return fetchLoads()
       })
+      .catch((error) => console.error("Error scheduling load", error))
+      .finally(() => setRefreshing(false))
   }
 
   function deleteLoadFunction(loadId: number) {
-    deleteLoad(loadId)
-      .then(() => {
-        console.log("Load deleted")
-        getLoads()
-          .catch((error) => console.error("Error getting loads", error))
-          .then(() => {
-            setRefreshing(false)
-          })
-      })
+    api
+      .deleteLoad(loadId)
+      .then(() => fetchLoads())
       .catch((error) => console.error("Error deleting load", error))
   }
 
@@ -115,7 +108,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
 
         {hasLoads ? (
           <>
-            {yourGroup?.groupLoadDays.map((day) => (
+            {groupLoadDays.map((day) => (
               <Fragment key={day?.day}>
                 <Text
                   key={day?.day}
@@ -124,7 +117,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
                   style={{ marginBottom: spacing.sm }}
                 />
 
-                {!!!day?.hasLoads ? (
+                {!day?.loads.length ? (
                   <Text
                     preset="default"
                     text={getRandomNoLoadMessage()}
@@ -137,7 +130,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
                       <Card
                         key={load?.load_id}
                         heading={load?.loadMember?.username || ""}
-                        content={`${load.loadTime}`}
+                        content={formatLoadTime(load.start_time, load.end_time)}
                         footer={load?.load_type || ""}
                         style={{ marginBottom: spacing.sm, alignItems: "center" }}
                         LeftComponent={
@@ -277,18 +270,15 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
                 text="Schedule"
                 style={$button}
                 onPress={() => {
-                  console.log("Modal has been closed.")
                   setIsScheduling(!isScheduling)
                   scheduleLoad()
                 }}
                 disabledStyle={{ backgroundColor: colors.palette.neutral400 }}
-                // disabled={groupNameError !== ""}
               />
               <Button
                 preset="default"
                 text="Cancel"
                 onPress={() => {
-                  console.log("Modal has been closed.")
                   setIsScheduling(!isScheduling)
                   setLoads([])
                   setIsUrgent(false)
@@ -308,7 +298,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = observer(function Home
       </View>
     </>
   )
-})
+}
 
 const $container: ViewStyle = {
   paddingTop: spacing.xxs,

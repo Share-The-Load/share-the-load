@@ -1,21 +1,15 @@
 import React, { FC, useEffect, useRef, useState } from "react"
-import { observer } from "mobx-react-lite"
 import { Alert, TextInput, TextStyle, ViewStyle } from "react-native"
 import { AppStackScreenProps, goBack } from "app/navigators"
 import { Screen, Text, TextField, Button } from "app/components"
 import { spacing } from "app/theme"
 import { useHeader } from "app/utils/useHeader"
 import axios from "app/utils/axios"
-import { useStores } from "app/models"
-
-// import { useNavigation } from "@react-navigation/native"
-// import { useStores } from "app/models"
+import { useAuthStore } from "app/store"
 
 interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
 
-export const RegisterScreen: FC<RegisterScreenProps> = observer(function RegisterScreen() {
-  // Pull in one of our MST stores
-  // const { someStore, anotherStore } = useStores()
+export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen() {
   const registerPasswordInput = useRef<TextInput>(null)
   const registerUsernameInput = useRef<TextInput>(null)
 
@@ -31,22 +25,17 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
   const usernameError = isSubmitted ? registerUsernameValidationError() : ""
 
   const {
-    authenticationStore: {
-      setAuthToken,
-      setRefreshToken,
-      distributeAuthToken,
-      setUserId,
-      setIsValidated,
-    },
-  } = useStores()
+    setAuthToken,
+    setRefreshToken,
+    distributeAuthToken,
+    setUserId,
+    setIsValidated,
+  } = useAuthStore()
 
   useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
     setRegisterEmail("")
     setRegisterPassword("")
 
-    // Return a "cleanup" function that React will run when the component unmounts
     return () => {
       setRegisterEmail("")
       setRegisterPassword("")
@@ -175,8 +164,8 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
         autoCapitalize="none"
         autoComplete="password"
         autoCorrect={false}
-        labelTx="loginScreen.passwordFieldLabel"
-        placeholderTx="loginScreen.passwordFieldPlaceholder"
+        label="Password"
+        placeholder="Super secret password here"
         onSubmitEditing={register}
         helper={passwordError}
         status={passwordError ? "error" : undefined}
@@ -191,7 +180,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = observer(function Registe
       />
     </Screen>
   )
-})
+}
 
 const $screenContentContainer: ViewStyle = {
   paddingHorizontal: spacing.lg,

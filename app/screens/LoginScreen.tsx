@@ -1,9 +1,8 @@
-import { observer } from "mobx-react-lite"
 import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
 
 import { ImageStyle, TextInput, TextStyle, ViewStyle, Image, ActivityIndicator } from "react-native"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
-import { useStores } from "../models"
+import { useAuthStore } from "../store"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
 import axios from "app/utils/axios"
@@ -11,7 +10,7 @@ const welcomeLogo = require("../../assets/images/logo.png")
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
-export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
+export const LoginScreen: FC<LoginScreenProps> = function LoginScreen(_props) {
   const authPasswordInput = useRef<TextInput>(null)
 
   const [authPassword, setAuthPassword] = useState("")
@@ -24,18 +23,15 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
   const { navigation } = _props
 
   const {
-    authenticationStore: {
-      setAuthToken,
-      setRefreshToken,
-      distributeAuthToken,
-      setUserGroupId,
-      setUserId,
-      setIsValidated,
-    },
-  } = useStores()
+    setAuthToken,
+    setRefreshToken,
+    distributeAuthToken,
+    setUserGroupId,
+    setUserId,
+    setIsValidated,
+  } = useAuthStore()
 
   useEffect(() => {
-    // Return a "cleanup" function that React will run when the component unmounts
     return () => {
       setAuthPassword("")
       setAuthEmailUsername("")
@@ -67,7 +63,6 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         setIsSubmitted(false)
         setAuthPassword("")
         setAuthEmailUsername("")
-        //if the user has registered but hasn't joined a group yet
         if (res.data.user.groupId !== null) setUserGroupId(res.data.user.groupId)
         setAuthToken(res.data.user.token)
         setRefreshToken(res.data.user.refreshToken)
@@ -116,9 +111,9 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
     >
       <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
 
-      <Text testID="login-heading" tx="loginScreen.signIn" preset="heading" style={$signIn} />
-      <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
-      <Text tx="loginScreen.registerDetails" preset="subheading" style={$registerDetails} />
+      <Text testID="login-heading" text="Sign In" preset="heading" style={$signIn} />
+      <Text text="Enter your details below to enter laundry collaboration nirvanna." preset="subheading" style={$enterDetails} />
+      <Text text="If you don't have an account, press the Sign Up button quickly. Only so many pairs of undies left..." preset="subheading" style={$registerDetails} />
       <ActivityIndicator animating={isLoading} />
 
       <TextField
@@ -129,8 +124,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         autoComplete="email"
         autoCorrect={false}
         keyboardType="email-address"
-        labelTx="loginScreen.emailFieldLabel"
-        placeholderTx="loginScreen.emailFieldPlaceholder"
+        label="Email/Username"
+        placeholder="Enter your email address or username"
         helper={error}
         status={error ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
@@ -145,8 +140,8 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
         autoComplete="password"
         autoCorrect={false}
         secureTextEntry={isAuthPasswordHidden}
-        labelTx="loginScreen.passwordFieldLabel"
-        placeholderTx="loginScreen.passwordFieldPlaceholder"
+        label="Password"
+        placeholder="Super secret password here"
         helper={errorPassword}
         status={errorPassword ? "error" : undefined}
         onSubmitEditing={login}
@@ -164,21 +159,21 @@ export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_
 
       <Button
         testID="login-button"
-        tx="loginScreen.tapToSignIn"
+        text="Sign In!"
         style={$tapButton}
         preset="default"
         onPress={login}
       />
       <Button
         testID="register-button"
-        tx="loginScreen.tapToRegister"
+        text="Sign Up!"
         style={$registerButton}
         preset="primary"
         onPress={register}
       />
     </Screen>
   )
-})
+}
 
 const $screenContentContainer: ViewStyle = {
   paddingVertical: spacing.lg,

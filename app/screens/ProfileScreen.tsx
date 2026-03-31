@@ -1,10 +1,12 @@
 import React, { FC, useEffect, useState } from "react"
-import { observer } from "mobx-react-lite"
 import { TextStyle, View, ViewStyle, Image, ScrollView, Platform, Alert } from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { AvatarSelect, Button, ListItem, Screen, Text, TextField } from "app/components"
 import { colors, spacing } from "app/theme"
-import { useStores } from "app/models"
+import { useAuthStore } from "app/store"
+import { api } from "app/services/api"
+import type { User } from "app/services/api/api.types"
+import { Titles } from "app/constants/titles"
 
 import RNPickerSelect from "react-native-picker-select"
 import RNDateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker"
@@ -13,27 +15,23 @@ import { AVATARS, getAvatarImage } from "app/constants/images"
 import Modal from "react-native-modal"
 import moment from "moment"
 
+function getProfileTitle(loads: number) {
+  if (loads < 1) return "No Load Joe"
+  const title = Titles.find((t) => loads < t.loads)?.title
+  return title || Titles[Titles.length - 1].title
+}
+
 interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
-export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileScreen() {
-  const {
-    authenticationStore: { logout, distributeAuthToken, userId },
-    userStore: {
-      getProfile,
-      updateLoadTime,
-      updatePreference,
-      editProfile,
-      deleteAccount,
-      profile,
-    },
-    groupStore: { updateUserMemberAvatar },
-  } = useStores()
+export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
+  const { logout, distributeAuthToken } = useAuthStore()
 
+  const [profile, setProfile] = useState<User | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [email, setEmail] = useState(profile?.email || "")
+  const [email, setEmail] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [avatar, setAvatar] = useState(profile?.avatar || 1)
+  const [avatar, setAvatar] = useState(1)
 
   const emailError = isSubmitted ? registerEmailValidationError() : ""
   const passwordError = isSubmitted ? registerPasswordValidationError() : ""
@@ -61,27 +59,45 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
     return `${hours}:${minutes}`
   }
 
+  async function fetchProfile() {
+    const response = await api.getProfile()
+    if (response.kind === "ok") {
+      setProfile(response.profile)
+      setEmail(response.profile.email)
+      setAvatar(response.profile.avatar)
+    }
+  }
+
   useEffect(() => {
     distributeAuthToken()
-    getProfile()
-      .catch((e) => console.log(e))
-      .then(() => {
-        console.log("ProfileScreen loaded")
-      })
-    return () => console.log("ProfileScreen unmounted")
+    fetchProfile().catch((e) => console.log(e))
   }, [])
 
   function callUpdateLoadTime(loadTime: number) {
     if (loadTime === profile?.load_time) return
     if (loadTime == null) return
-    updateLoadTime(loadTime)
-      .then(() => console.log("Updated Load Time"))
+    api.updateLoadTime(loadTime)
+      .then(() => {
+        setProfile((prev) => prev ? { ...prev, load_time: loadTime } : prev)
+      })
       .catch((e) => console.log(e))
   }
 
   function callUpdatePrefTime(preference_id: number, startTime: string, endTime: string) {
-    updatePreference(preference_id, startTime, endTime)
-      .then(() => console.log("Upadated Pref Time"))
+    api.updatePreference(preference_id, startTime, endTime)
+      .then(() => {
+        setProfile((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            preferences: prev.preferences.map((p) =>
+              p.preference_id === preference_id
+                ? { ...p, start_time: startTime, end_time: endTime }
+                : p,
+            ),
+          }
+        })
+      })
       .catch((e) => console.log(e))
   }
 
@@ -89,14 +105,11 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
     setIsSubmitted(true)
     if (registerEmailValidationError()) return
     if (registerPasswordValidationError()) return
-    editProfile(email, newPassword, avatar)
+    api.editProfile(email, newPassword, avatar)
       .then(() => {
-        //update group member
-        updateUserMemberAvatar(avatar, userId || 0)
-        setEmail(email)
+        setProfile((prev) => prev ? { ...prev, email, avatar } : prev)
         setNewPassword("")
-        setAvatar(avatar)
-        setIsEditing(!isEditing)
+        setIsEditing(false)
       })
       .catch((e) => console.log(e))
   }
@@ -107,15 +120,13 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
       {
         text: "Delete",
         onPress: () => {
-          deleteAccount()
-            .then((response: any) => {
-              console.log(response)
+          api.deleteAccount()
+            .then(() => {
               Alert.alert("Success", "Account will be deleted in 24-48 hours.")
               logout()
             })
-            .catch((error: any) => {
+            .catch(() => {
               Alert.alert("Error", "An error occurred. Please try again later")
-              console.log(error)
             })
         },
       },
@@ -151,8 +162,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
           <Text style={$titleStyle} text={profile?.username} />
           <Text style={$subheaderStyle} text={profile?.email} />
           <Text style={$subheaderStyle} text={`${profile?.loads} loads shared`} />
-          <Text style={$subheaderStyle} text={profile?.profileTitle} />
-
+          <Text style={$subheaderStyle} text={profile ? getProfileTitle(profile.loads) : ""} />
           <Text style={$subheaderStyle} text={`Sharing Loads for ${profile?.memberSince}`} />
         </View>
       </View>
@@ -264,7 +274,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
         />
       ))}
       <View style={$buttonContainer}>
-        <Button preset="default" tx="common.logOut" onPress={logout} />
+        <Button preset="default" text="Log Out" onPress={logout} />
         <Button
           style={{ marginVertical: spacing.sm }}
           preset="filled"
@@ -338,10 +348,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               preset="primary"
               text="Save"
               style={{ marginBottom: spacing.sm }}
-              onPress={() => {
-                console.log("Modal has been closed.")
-                callEditProfile()
-              }}
+              onPress={() => callEditProfile()}
               disabledStyle={{ backgroundColor: colors.palette.neutral400 }}
               disabled={emailError !== ""}
             />
@@ -349,7 +356,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
               preset="default"
               text="Cancel"
               onPress={() => {
-                console.log("Modal has been closed.")
                 setIsEditing(!isEditing)
                 setAvatar(profile?.avatar || 1)
                 setEmail(profile?.email || "")
@@ -361,7 +367,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = observer(function ProfileSc
       </Modal>
     </Screen>
   )
-})
+}
 
 const $container: ViewStyle = {
   paddingTop: spacing.md,
@@ -370,7 +376,6 @@ const $container: ViewStyle = {
 }
 
 const $prefButton: ViewStyle = {
-  // marginHorizontal: spacing.xs,
   backgroundColor: colors.palette.accent100,
 }
 
