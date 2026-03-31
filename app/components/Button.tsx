@@ -19,65 +19,20 @@ export interface ButtonAccessoryProps {
 }
 
 export interface ButtonProps extends PressableProps {
-  /**
-   * The text to display if not using nested components.
-   */
   text?: TextProps["text"]
-  /**
-   * An optional style override useful for padding & margin.
-   */
   style?: StyleProp<ViewStyle>
-  /**
-   * An optional style override for the "pressed" state.
-   */
   pressedStyle?: StyleProp<ViewStyle>
-  /**
-   * An optional style override for the button text.
-   */
   textStyle?: StyleProp<TextStyle>
-  /**
-   * An optional style override for the button text when in the "pressed" state.
-   */
   pressedTextStyle?: StyleProp<TextStyle>
-  /**
-   * An optional style override for the button text when in the "disabled" state.
-   */
   disabledTextStyle?: StyleProp<TextStyle>
-  /**
-   * One of the different types of button presets.
-   */
   preset?: Presets
-  /**
-   * An optional component to render on the right side of the text.
-   * Example: `RightAccessory={(props) => <View {...props} />}`
-   */
   RightAccessory?: ComponentType<ButtonAccessoryProps>
-  /**
-   * An optional component to render on the left side of the text.
-   * Example: `LeftAccessory={(props) => <View {...props} />}`
-   */
   LeftAccessory?: ComponentType<ButtonAccessoryProps>
-  /**
-   * Children components.
-   */
   children?: React.ReactNode
-  /**
-   * disabled prop, accessed directly for declarative styling reasons.
-   * https://reactnative.dev/docs/pressable#disabled
-   */
   disabled?: boolean
-  /**
-   * An optional style override for the disabled state
-   */
   disabledStyle?: StyleProp<ViewStyle>
 }
 
-/**
- * A component that allows users to take actions and make choices.
- * Wraps the Text component with a Pressable component.
- *
- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Button.md)
- */
 export function Button(props: ButtonProps) {
   const {
     text,
@@ -170,49 +125,21 @@ const $leftAccessoryStyle: ViewStyle = { marginEnd: spacing.xs, zIndex: 1 }
 const $viewPresets = {
   default: [
     $baseViewStyle,
-    {
-      borderWidth: 1,
-      borderColor: colors.palette.neutral400,
-      backgroundColor: colors.palette.neutral100,
-    },
+    { borderWidth: 1, borderColor: colors.palette.neutral400, backgroundColor: colors.palette.neutral100 },
   ] as StyleProp<ViewStyle>,
-
   filled: [$baseViewStyle, { backgroundColor: colors.palette.neutral300 }] as StyleProp<ViewStyle>,
-
-  reversed: [
-    $baseViewStyle,
-    { backgroundColor: colors.palette.neutral800 },
-  ] as StyleProp<ViewStyle>,
-
+  reversed: [$baseViewStyle, { backgroundColor: colors.palette.neutral800 }] as StyleProp<ViewStyle>,
   primary: [$baseViewStyle, { backgroundColor: colors.palette.primary600 }] as StyleProp<ViewStyle>,
-
-  secondary: [
-    $baseViewStyle,
-    { backgroundColor: colors.palette.secondary300 },
-  ] as StyleProp<ViewStyle>,
-
+  secondary: [$baseViewStyle, { backgroundColor: colors.palette.secondary300 }] as StyleProp<ViewStyle>,
   small: {
-    minHeight: 25,
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: spacing.xs,
-    overflow: "hidden",
-    backgroundColor: colors.palette.secondary300,
+    minHeight: 25, borderRadius: 4, justifyContent: "center", alignItems: "center",
+    flexDirection: "row", paddingVertical: 10, paddingHorizontal: spacing.xs,
+    overflow: "hidden", backgroundColor: colors.palette.secondary300,
   } as StyleProp<ViewStyle>,
-
   clear: {
-    minHeight: 25,
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: spacing.xs,
-    overflow: "hidden",
-    backgroundColor: "none",
+    minHeight: 25, borderRadius: 4, justifyContent: "center", alignItems: "center",
+    flexDirection: "row", paddingVertical: 10, paddingHorizontal: spacing.xs,
+    overflow: "hidden", backgroundColor: "none",
   } as StyleProp<ViewStyle>,
 }
 
@@ -222,30 +149,14 @@ const $textPresets: Record<Presets, StyleProp<TextStyle>> = {
   reversed: [$baseTextStyle, { color: colors.palette.neutral100 }],
   primary: [$baseTextStyle, { color: colors.palette.neutral100 }],
   secondary: [$baseTextStyle, { color: colors.palette.neutral100 }],
-  small: [
-    {
-      fontSize: 16,
-      lineHeight: 20,
-      fontFamily: typography.primary.medium,
-      textAlign: "center",
-      flexShrink: 1,
-      flexGrow: 0,
-      zIndex: 2,
-      color: colors.palette.neutral100,
-    },
-  ],
-  clear: [
-    {
-      fontSize: 16,
-      lineHeight: 20,
-      fontFamily: typography.primary.medium,
-      textAlign: "center",
-      flexShrink: 1,
-      flexGrow: 0,
-      zIndex: 2,
-      color: colors.palette.accent500,
-    },
-  ],
+  small: [{
+    fontSize: 16, lineHeight: 20, fontFamily: typography.primary.medium,
+    textAlign: "center", flexShrink: 1, flexGrow: 0, zIndex: 2, color: colors.palette.neutral100,
+  }],
+  clear: [{
+    fontSize: 16, lineHeight: 20, fontFamily: typography.primary.medium,
+    textAlign: "center", flexShrink: 1, flexGrow: 0, zIndex: 2, color: colors.palette.accent500,
+  }],
 }
 
 const $pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {

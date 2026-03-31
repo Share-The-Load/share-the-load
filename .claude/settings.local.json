@@ -4,7 +4,12 @@
       "Bash(grep:*)",
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Read(//Users/brettstrouse/Documents/Projects/ShareTheLoad/**)",
+      "Bash(npx create-expo-app@latest share-the-load-new --template blank-typescript)",
+      "Bash(npx expo:*)",
+      "Bash(cp:*)",
+      "Bash(do cp:*)"
     ]
   }
 }

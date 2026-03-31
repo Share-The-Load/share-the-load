@@ -10,11 +10,9 @@ interface AuthState {
   userGroupId: number | undefined
   validated: boolean
 
-  // Computed
   isAuthenticated: boolean
   hasGroup: boolean
 
-  // Actions
   setAuthToken: (value: string | undefined) => void
   setRefreshToken: (value: string | undefined) => void
   setUserId: (value: number | undefined) => void
@@ -50,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
 
       distributeAuthToken: () => {
         const token = get().authToken
-        api.apisauce.setHeader("Authorization", `Bearer ${token}`)
+        api.setHeader("Authorization", `Bearer ${token}`)
       },
 
       validateAndRefreshToken: async () => {
@@ -59,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           await api.validateToken(authToken)
-          api.apisauce.setHeader("Authorization", `Bearer ${authToken}`)
+          api.setHeader("Authorization", `Bearer ${authToken}`)
           set({ validated: true })
         } catch {
           try {
@@ -69,7 +67,7 @@ export const useAuthStore = create<AuthState>()(
               refreshToken: response.refreshToken,
               validated: true,
             })
-            api.apisauce.setHeader("Authorization", `Bearer ${response.token}`)
+            api.setHeader("Authorization", `Bearer ${response.token}`)
           } catch {
             console.error("Error refreshing token")
             set({ validated: false })

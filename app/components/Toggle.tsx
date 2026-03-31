@@ -18,6 +18,8 @@ import { colors, spacing } from "../theme"
 import { iconRegistry, IconTypes } from "./Icon"
 import { Text, TextProps } from "./Text"
 
+
+
 type Variants = "checkbox" | "switch" | "radio"
 
 interface BaseToggleProps extends Omit<TouchableOpacityProps, "style"> {
@@ -240,26 +242,26 @@ function Checkbox(props: ToggleInputProps) {
     disabled && colors.palette.neutral400,
     status === "error" && colors.errorBackground,
     colors.palette.neutral200,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const outerBorderColor = [
     disabled && colors.palette.neutral400,
     status === "error" && colors.error,
     !on && colors.palette.neutral800,
     colors.palette.secondary500,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const onBackgroundColor = [
     disabled && colors.transparent,
     status === "error" && colors.errorBackground,
     colors.palette.secondary500,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const iconTintColor = [
     disabled && colors.palette.neutral600,
     status === "error" && colors.error,
     colors.palette.accent100,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   return (
     <View
@@ -304,26 +306,26 @@ function Radio(props: ToggleInputProps) {
     disabled && colors.palette.neutral400,
     status === "error" && colors.errorBackground,
     colors.palette.neutral200,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const outerBorderColor = [
     disabled && colors.palette.neutral400,
     status === "error" && colors.error,
     !on && colors.palette.neutral800,
     colors.palette.secondary500,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const onBackgroundColor = [
     disabled && colors.transparent,
     status === "error" && colors.errorBackground,
     colors.palette.neutral100,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const dotBackgroundColor = [
     disabled && colors.palette.neutral600,
     status === "error" && colors.error,
     colors.palette.secondary500,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   return (
     <View
@@ -373,13 +375,13 @@ function Switch(props: ToggleInputProps) {
     disabled && colors.palette.neutral400,
     status === "error" && colors.errorBackground,
     colors.palette.neutral300,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const onBackgroundColor = [
     disabled && colors.transparent,
     status === "error" && colors.errorBackground,
     colors.palette.secondary500,
-  ].filter(Boolean)[0]
+  ].find(Boolean) as string | undefined
 
   const knobBackgroundColor = (function () {
     if (on) {
@@ -388,14 +390,14 @@ function Switch(props: ToggleInputProps) {
         status === "error" && colors.error,
         disabled && colors.palette.neutral600,
         colors.palette.neutral100,
-      ].filter(Boolean)[0]
+      ].find(Boolean) as string | undefined
     } else {
       return [
         $innerStyleOverride?.backgroundColor,
         disabled && colors.palette.neutral600,
         status === "error" && colors.error,
         colors.palette.neutral200,
-      ].filter(Boolean)[0]
+      ].find(Boolean) as string | undefined
     }
   })()
 

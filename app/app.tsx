@@ -1,17 +1,3 @@
-/* eslint-disable import/first */
-/**
- * Welcome to the main entry point of the app. In this file, we'll
- * be kicking off our app.
- *
- * Most of this file is boilerplate and you shouldn't need to modify
- * it very often. But take some time to look through and understand
- * what is going on here.
- *
- * The app navigation resides in ./app/navigators, so head over there
- * if you're interested in adding screens and navigators.
- */
-
-import "./utils/ignoreWarnings"
 import { useFonts } from "expo-font"
 import React, { useEffect, useState } from "react"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
@@ -27,7 +13,6 @@ import { useAuthStore } from "./store"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
-// Web linking configuration
 const prefix = Linking.createURL("/")
 const config = {
   screens: {
@@ -46,12 +31,9 @@ const config = {
 }
 
 interface AppProps {
-  hideSplashScreen: () => Promise<boolean>
+  hideSplashScreen: () => Promise<boolean | void>
 }
 
-/**
- * This is the root component of our app.
- */
 function App(props: AppProps) {
   const { hideSplashScreen } = props
   const {

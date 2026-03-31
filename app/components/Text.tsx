@@ -7,38 +7,14 @@ type Weights = keyof typeof typography.primary
 type Presets = keyof typeof $presets
 
 export interface TextProps extends RNTextProps {
-  /**
-   * The text to display if not using nested components.
-   */
   text?: string
-  /**
-   * An optional style override useful for padding & margin.
-   */
   style?: StyleProp<TextStyle>
-  /**
-   * One of the different types of text presets.
-   */
   preset?: Presets
-  /**
-   * Text weight modifier.
-   */
   weight?: Weights
-  /**
-   * Text size modifier.
-   */
   size?: Sizes
-  /**
-   * Children components.
-   */
   children?: React.ReactNode
 }
 
-/**
- * For your text displaying needs.
- * This component is a HOC over the built-in React Native one.
- *
- * - [Documentation and Examples](https://github.com/infinitered/ignite/blob/master/docs/Components-Text.md)
- */
 export function Text(props: TextProps) {
   const { weight, size, text, children, style: $styleOverride, ...rest } = props
 
@@ -81,19 +57,14 @@ const $baseStyle: StyleProp<TextStyle> = [
 
 const $presets = {
   default: $baseStyle,
-
   bold: [$baseStyle, $fontWeightStyles.bold] as StyleProp<TextStyle>,
-
   heading: [$baseStyle, $sizeStyles.xxl, $fontWeightStyles.bold] as StyleProp<TextStyle>,
-
   subheading: [
     $baseStyle,
     $sizeStyles.lg,
     $fontWeightStyles.medium,
     { color: colors.palette.accent700 },
   ] as StyleProp<TextStyle>,
-
   formLabel: [$baseStyle, $fontWeightStyles.medium] as StyleProp<TextStyle>,
-
   formHelper: [$baseStyle, $sizeStyles.sm, $fontWeightStyles.normal] as StyleProp<TextStyle>,
 }

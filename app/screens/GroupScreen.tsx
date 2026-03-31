@@ -97,7 +97,7 @@ export const GroupScreen: FC<GroupScreenProps> = function GroupScreen(_props) {
                 },
                 {
                   text: "Join",
-                  onPress: async (passcode) => {
+                  onPress: async (passcode: string | undefined) => {
                     setIsLoading(true)
                     api
                       .joinGroup(group.group_id, passcode || "")

@@ -23,7 +23,6 @@ const LOADS = [
     require("../../assets/images/loads/other.png"),
 ]
 
-
 export const GROUPS = [
     require("../../assets/images/groups/group_1.png"),
     require("../../assets/images/groups/group_2.png"),
@@ -35,39 +34,25 @@ export const GROUPS = [
 ]
 
 export function getGroupImage(groupIndex: number | undefined): ImageRequireSource {
-    if (groupIndex === undefined) {
-        return GROUPS[0]
-    }
+    if (groupIndex === undefined) return GROUPS[0]
     return GROUPS[groupIndex - 1]
 }
 
 export function getLoadImage(loadType: string | undefined): ImageRequireSource {
-    if (loadType === undefined) {
-        return LOADS[0]
-    }
+    if (loadType === undefined) return LOADS[0]
     switch (loadType) {
-        case "Whites":
-            return LOADS[0]
-        case "Darks":
-            return LOADS[1]
-        case "Colors":
-            return LOADS[2]
-        case "Delicates":
-            return LOADS[3]
-        case "Towels":
-            return LOADS[4]
-        case "Bedding":
-            return LOADS[5]
-        case "Other":
-            return LOADS[6]
-        default:
-            return LOADS[0]
+        case "Whites": return LOADS[0]
+        case "Darks": return LOADS[1]
+        case "Colors": return LOADS[2]
+        case "Delicates": return LOADS[3]
+        case "Towels": return LOADS[4]
+        case "Bedding": return LOADS[5]
+        case "Other": return LOADS[6]
+        default: return LOADS[0]
     }
 }
 
 export function getAvatarImage(index: number | undefined): ImageRequireSource {
-    if (index === undefined) {
-        return AVATARS[0]
-    }
+    if (index === undefined) return AVATARS[0]
     return AVATARS[index - 1]
 }

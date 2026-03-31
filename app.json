@@ -1,6 +1,4 @@
 {
-  "name": "share-the-load",
-  "displayName": "Share The Load",
   "expo": {
     "name": "Share The Load",
     "slug": "share-the-load",
@@ -13,16 +11,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-all.png",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash-logo-all.png",
       "resizeMode": "contain",
       "backgroundColor": "#C7E0EF"
     },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "jsEngine": "hermes",
-    "assetBundlePatterns": ["**/*"],
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
       "package": "com.sharetheload.app",
@@ -58,25 +52,6 @@
       },
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-localization",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "newArchEnabled": false
-          },
-          "android": {
-            "newArchEnabled": false
-          }
-        }
-      ]
-    ],
-    "experiments": {
-      "tsconfigPaths": true
-    }
-  },
-  "ignite": {
-    "version": "9.4.4"
+    "plugins": ["@react-native-community/datetimepicker", "expo-font"]
   }
 }

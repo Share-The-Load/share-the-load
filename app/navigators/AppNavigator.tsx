@@ -1,8 +1,3 @@
-/**
- * The app navigator is used for the primary navigation flows of your app.
- * It contains an auth flow (registration, login, forgot password)
- * and a "main" flow which the user will use once logged in.
- */
 import {
   DarkTheme,
   DefaultTheme,
@@ -82,7 +77,7 @@ export const AppNavigator = function AppNavigator(props: NavigationProps) {
 
   return (
     <NavigationContainer
-      ref={navigationRef}
+      ref={navigationRef as any}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       {...props}
     >
