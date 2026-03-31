@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useEffect, useState } from "react"
+import React, { FC, Fragment, useCallback, useState } from "react";
 import {
   ImageStyle,
   TextStyle,
@@ -9,307 +9,375 @@ import {
   Alert,
   ScrollView,
   Dimensions,
-} from "react-native"
-import Modal from "react-native-modal"
-import { MainTabScreenProps } from "app/navigators"
+} from "react-native";
+import Modal from "react-native-modal";
+import { MainTabScreenProps } from "app/navigators";
 import {
   Button,
   Card,
+  DataLoader,
   Icon,
   ImageSelect,
   ListItem,
   Screen,
   Text,
   Toggle,
-} from "app/components"
-import { colors, spacing } from "../theme"
-import { useAuthStore } from "../store"
-import { api } from "app/services/api"
-import { getRandomNoLoadMessage } from "app/constants/noLoadMessages"
-import { getLoadImage } from "app/constants/images"
-import type { GroupDay } from "app/services/api/api.types"
-import moment from "moment"
-var { height } = Dimensions.get("window")
+} from "app/components";
+import { colors, spacing } from "../theme";
+import { useAuthStore } from "../store";
+import { api } from "app/services/api";
+import { getRandomNoLoadMessage } from "app/constants/noLoadMessages";
+import { getLoadImage } from "app/constants/images";
+import type { GroupDay } from "app/services/api/api.types";
+import moment from "moment";
+var { height } = Dimensions.get("window");
 
-const stlLogo = require("../../assets/images/logo.png")
-const oysterLogo = require("../../assets/images/oyster.png")
+const stlLogo = require("../../assets/images/logo.png");
+const oysterLogo = require("../../assets/images/oyster.png");
 
 function formatLoadTime(start_time: string, end_time: string) {
-  const start = moment(start_time).format("h:mm A")
-  const end = moment(end_time).format("h:mm A")
-  return `${start} - ${end}`
+  const start = moment(start_time).format("h:mm A");
+  const end = moment(end_time).format("h:mm A");
+  return `${start} - ${end}`;
 }
 
-export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_props) {
-  const { distributeAuthToken, userId } = useAuthStore()
+export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(
+  _props,
+) {
+  const { distributeAuthToken, userId } = useAuthStore();
 
-  const [refreshing, setRefreshing] = useState(false)
-  const [isScheduling, setIsScheduling] = useState(false)
-  const [isUrgent, setIsUrgent] = useState(false)
-  const [loads, setLoads] = useState([] as any)
-  const [groupLoadDays, setGroupLoadDays] = useState<GroupDay[]>([])
+  const [refreshing, setRefreshing] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [loads, setLoads] = useState([] as any);
 
-  const hasLoads = groupLoadDays.some((day) => day.loads.length > 0)
-
-  async function fetchLoads() {
-    const response = await api.getLoadsHome()
+  const fetchLoads = useCallback(async (): Promise<GroupDay[]> => {
+    distributeAuthToken();
+    const response = await api.getLoadsHome();
     if (response.kind === "ok" && response.days) {
-      setGroupLoadDays(response.days)
+      return response.days;
     }
-  }
-
-  useEffect(() => {
-    distributeAuthToken()
-    fetchLoads().catch((error) => console.error("Error getting loads", error))
-  }, [])
-
-  const onRefresh = () => {
-    setRefreshing(true)
-    fetchLoads()
-      .catch((error) => console.error("Error getting loads", error))
-      .finally(() => setRefreshing(false))
-  }
+    throw new Error("Failed to load scheduled loads");
+  }, []);
 
   function addLoad(loadType: string) {
-    const randomThreeDigitId = Math.floor(Math.random() * 900) + 100
-    setLoads([...loads, { type: loadType, id: randomThreeDigitId }])
-  }
-
-  function scheduleLoad() {
-    setRefreshing(true)
-    api
-      .schedule(loads, isUrgent)
-      .then(() => {
-        setLoads([])
-        return fetchLoads()
-      })
-      .catch((error) => console.error("Error scheduling load", error))
-      .finally(() => setRefreshing(false))
-  }
-
-  function deleteLoadFunction(loadId: number) {
-    api
-      .deleteLoad(loadId)
-      .then(() => fetchLoads())
-      .catch((error) => console.error("Error deleting load", error))
+    const randomThreeDigitId = Math.floor(Math.random() * 900) + 100;
+    setLoads([...loads, { type: loadType, id: randomThreeDigitId }]);
   }
 
   return (
-    <>
-      <Screen
-        preset="scroll"
-        safeAreaEdges={["top"]}
-        contentContainerStyle={$container}
-        ScrollViewProps={{
-          refreshControl: <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />,
-        }}
-      >
-        <Image style={$welcomeLogo} source={stlLogo} resizeMode="contain" />
+    <DataLoader queryFn={fetchLoads} loadingMessage="Loading loads...">
+      {(days, refetch) => {
+        const hasLoads = days.some((day) => day.loads.length > 0);
 
-        {hasLoads ? (
+        const onRefresh = () => {
+          setRefreshing(true);
+          refetch();
+          setRefreshing(false);
+        };
+
+        function scheduleLoad() {
+          setRefreshing(true);
+          api
+            .schedule(loads, isUrgent)
+            .then(() => {
+              setLoads([]);
+              refetch();
+            })
+            .catch((error) => console.error("Error scheduling load", error))
+            .finally(() => setRefreshing(false));
+        }
+
+        function deleteLoadFunction(loadId: number) {
+          api
+            .deleteLoad(loadId)
+            .then(() => refetch())
+            .catch((error) => console.error("Error deleting load", error));
+        }
+
+        return (
           <>
-            {groupLoadDays.map((day) => (
-              <Fragment key={day?.day}>
-                <Text
-                  key={day?.day}
-                  preset="subheading"
-                  text={day?.day || ""}
-                  style={{ marginBottom: spacing.sm }}
-                />
-
-                {!day?.loads.length ? (
-                  <Text
-                    preset="default"
-                    text={getRandomNoLoadMessage()}
-                    key={day?.day + "noLoads"}
-                    style={{ marginBottom: spacing.sm, color: colors.palette.accent300 }}
+            <Screen
+              preset="scroll"
+              safeAreaEdges={["top"]}
+              contentContainerStyle={$container}
+              ScrollViewProps={{
+                refreshControl: (
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
                   />
-                ) : (
-                  <>
-                    {day?.loads.map((load) => (
-                      <Card
-                        key={load?.load_id}
-                        heading={load?.loadMember?.username || ""}
-                        content={formatLoadTime(load.start_time, load.end_time)}
-                        footer={load?.load_type || ""}
-                        style={{ marginBottom: spacing.sm, alignItems: "center" }}
-                        LeftComponent={
-                          <Image
-                            source={getLoadImage(load?.load_type)}
-                            style={{
-                              width: 50,
-                              height: 50,
-                              borderRadius: 20,
-                              marginEnd: spacing.xs,
-                            }}
-                          />
-                        }
-                        RightComponent={
-                          <>
-                            {load.loadMember.user_id === userId && (
-                              <Icon
-                                icon="trash"
-                                size={24}
-                                color={colors.palette.angry100}
-                                onPress={() => {
-                                  Alert.alert(
-                                    "Delete Load",
-                                    `Risk having to turn those undies inside out?`,
-                                    [
-                                      {
-                                        text: "Cancel",
-                                        onPress: () => console.log("Cancel Pressed"),
-                                        style: "cancel",
-                                      },
-                                      {
-                                        text: "Delete",
-                                        onPress: () => deleteLoadFunction(load?.load_id),
-                                      },
-                                    ],
-                                    { cancelable: false },
-                                  )
-                                }}
-                              />
-                            )}
-                          </>
-                        }
-                      />
-                    ))}
-                  </>
-                )}
-              </Fragment>
-            ))}
-          </>
-        ) : (
-          <>
-            <Text
-              preset="subheading"
-              text="Wow, no loads scheduled. The laundry room is your oyster..."
-              style={$title}
-            />
-            <Image style={$oyster} source={oysterLogo} resizeMode="contain" />
-          </>
-        )}
-        <Modal
-          isVisible={isScheduling}
-          backdropColor="white"
-          backdropOpacity={1}
-          scrollHorizontal={true}
-          coverScreen={true}
-        >
-          <ScrollView style={{ marginVertical: 50 }}>
-            <Text
-              preset="subheading"
-              style={{ marginBottom: 20 }}
-              text="Share The Load Scheduler"
-            />
-
-            <Text preset="default" style={{ marginBottom: 20 }} text="Select the load type:" />
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                alignContent: "flex-start",
-                flexWrap: "wrap",
+                ),
               }}
             >
-              <ImageSelect label="Whites" onPress={() => addLoad("Whites")} />
-              <ImageSelect label="Darks" onPress={() => addLoad("Darks")} />
-              <ImageSelect label="Colors" onPress={() => addLoad("Colors")} />
-              <ImageSelect label="Delicates" onPress={() => addLoad("Delicates")} />
-              <ImageSelect label="Towels" onPress={() => addLoad("Towels")} />
-              <ImageSelect label="Bedding" onPress={() => addLoad("Bedding")} />
-              <ImageSelect label="Other" onPress={() => addLoad("Other")} />
-            </View>
-
-            <Text preset="default" style={{ marginBottom: 10 }} text="Loads:" />
-
-            {!loads.length && (
-              <Text
-                preset="formHelper"
-                text="No loads scheduled"
-                style={{ color: colors.palette.accent400 }}
+              <Image
+                style={$welcomeLogo}
+                source={stlLogo}
+                resizeMode="contain"
               />
-            )}
 
-            {loads.map((load: any) => (
-              <ListItem
-                key={load?.id}
-                text={load?.type || ""}
-                style={{ alignItems: "center" }}
-                LeftComponent={
+              {hasLoads ? (
+                <>
+                  {days.map((day) => (
+                    <Fragment key={day.day}>
+                      <Text
+                        preset="subheading"
+                        text={day.day || ""}
+                        style={{ marginBottom: spacing.sm }}
+                      />
+
+                      {!day.loads.length ? (
+                        <Text
+                          preset="default"
+                          text={getRandomNoLoadMessage()}
+                          key={day.day + "noLoads"}
+                          style={{
+                            marginBottom: spacing.sm,
+                            color: colors.palette.accent300,
+                          }}
+                        />
+                      ) : (
+                        <>
+                          {day.loads.map((load) => (
+                            <Card
+                              key={load.load_id}
+                              heading={load.loadMember.username || ""}
+                              content={formatLoadTime(
+                                load.start_time,
+                                load.end_time,
+                              )}
+                              footer={load.load_type || ""}
+                              style={{
+                                marginBottom: spacing.sm,
+                                alignItems: "center",
+                              }}
+                              LeftComponent={
+                                <Image
+                                  source={getLoadImage(load.load_type)}
+                                  style={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: 20,
+                                    marginEnd: spacing.xs,
+                                  }}
+                                />
+                              }
+                              RightComponent={
+                                <>
+                                  {load.loadMember.user_id === userId && (
+                                    <Icon
+                                      icon="trash"
+                                      size={24}
+                                      color={colors.palette.angry100}
+                                      onPress={() => {
+                                        Alert.alert(
+                                          "Delete Load",
+                                          `Risk having to turn those undies inside out?`,
+                                          [
+                                            {
+                                              text: "Cancel",
+                                              onPress: () =>
+                                                console.log("Cancel Pressed"),
+                                              style: "cancel",
+                                            },
+                                            {
+                                              text: "Delete",
+                                              onPress: () =>
+                                                deleteLoadFunction(
+                                                  load.load_id,
+                                                ),
+                                            },
+                                          ],
+                                          { cancelable: false },
+                                        );
+                                      }}
+                                    />
+                                  )}
+                                </>
+                              }
+                            />
+                          ))}
+                        </>
+                      )}
+                    </Fragment>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <Text
+                    preset="subheading"
+                    text="Wow, no loads scheduled. The laundry room is your oyster..."
+                    style={$title}
+                  />
                   <Image
-                    source={getLoadImage(load?.type)}
-                    style={{ width: 30, height: 30, marginEnd: spacing.sm }}
+                    style={$oyster}
+                    source={oysterLogo}
+                    resizeMode="contain"
                   />
-                }
-                RightComponent={
-                  <Icon
-                    icon="trash"
-                    size={24}
-                    color={colors.palette.angry500}
-                    onPress={() => setLoads(loads.filter((l: any) => l.id !== load.id))}
+                </>
+              )}
+              <Modal
+                isVisible={isScheduling}
+                backdropColor="white"
+                backdropOpacity={1}
+                scrollHorizontal={true}
+                coverScreen={true}
+              >
+                <ScrollView style={{ marginVertical: 50 }}>
+                  <Text
+                    preset="subheading"
+                    style={{ marginBottom: 20 }}
+                    text="Share The Load Scheduler"
                   />
-                }
-              ></ListItem>
-            ))}
 
-            <Toggle
-              value={isUrgent}
-              onValueChange={() => setIsUrgent(!isUrgent)}
-              variant="switch"
-              label="Urgent?"
-              labelPosition="left"
-              containerStyle={{ marginVertical: spacing.md }}
-            />
+                  <Text
+                    preset="default"
+                    style={{ marginBottom: 20 }}
+                    text="Select the load type:"
+                  />
 
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignContent: "flex-start",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <ImageSelect
+                      label="Whites"
+                      onPress={() => addLoad("Whites")}
+                    />
+                    <ImageSelect
+                      label="Darks"
+                      onPress={() => addLoad("Darks")}
+                    />
+                    <ImageSelect
+                      label="Colors"
+                      onPress={() => addLoad("Colors")}
+                    />
+                    <ImageSelect
+                      label="Delicates"
+                      onPress={() => addLoad("Delicates")}
+                    />
+                    <ImageSelect
+                      label="Towels"
+                      onPress={() => addLoad("Towels")}
+                    />
+                    <ImageSelect
+                      label="Bedding"
+                      onPress={() => addLoad("Bedding")}
+                    />
+                    <ImageSelect
+                      label="Other"
+                      onPress={() => addLoad("Other")}
+                    />
+                  </View>
+
+                  <Text
+                    preset="default"
+                    style={{ marginBottom: 10 }}
+                    text="Loads:"
+                  />
+
+                  {!loads.length && (
+                    <Text
+                      preset="formHelper"
+                      text="No loads scheduled"
+                      style={{ color: colors.palette.accent400 }}
+                    />
+                  )}
+
+                  {loads.map((load: any) => (
+                    <ListItem
+                      key={load?.id}
+                      text={load?.type || ""}
+                      style={{ alignItems: "center" }}
+                      LeftComponent={
+                        <Image
+                          source={getLoadImage(load?.type)}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            marginEnd: spacing.sm,
+                          }}
+                        />
+                      }
+                      RightComponent={
+                        <Icon
+                          icon="trash"
+                          size={24}
+                          color={colors.palette.angry500}
+                          onPress={() =>
+                            setLoads(loads.filter((l: any) => l.id !== load.id))
+                          }
+                        />
+                      }
+                    ></ListItem>
+                  ))}
+
+                  <Toggle
+                    value={isUrgent}
+                    onValueChange={() => setIsUrgent(!isUrgent)}
+                    variant="switch"
+                    label="Urgent?"
+                    labelPosition="left"
+                    containerStyle={{ marginVertical: spacing.md }}
+                  />
+
+                  <View>
+                    <Button
+                      preset="primary"
+                      text="Schedule"
+                      style={$button}
+                      onPress={() => {
+                        setIsScheduling(!isScheduling);
+                        scheduleLoad();
+                      }}
+                      disabledStyle={{
+                        backgroundColor: colors.palette.neutral400,
+                      }}
+                    />
+                    <Button
+                      preset="default"
+                      text="Cancel"
+                      onPress={() => {
+                        setIsScheduling(!isScheduling);
+                        setLoads([]);
+                        setIsUrgent(false);
+                      }}
+                    />
+                  </View>
+                </ScrollView>
+              </Modal>
+            </Screen>
             <View>
               <Button
                 preset="primary"
-                text="Schedule"
                 style={$button}
-                onPress={() => {
-                  setIsScheduling(!isScheduling)
-                  scheduleLoad()
-                }}
-                disabledStyle={{ backgroundColor: colors.palette.neutral400 }}
-              />
-              <Button
-                preset="default"
-                text="Cancel"
-                onPress={() => {
-                  setIsScheduling(!isScheduling)
-                  setLoads([])
-                  setIsUrgent(false)
-                }}
+                text="Schedule a Load"
+                onPress={() =>
+                  isScheduling ? setIsScheduling(false) : setIsScheduling(true)
+                }
               />
             </View>
-          </ScrollView>
-        </Modal>
-      </Screen>
-      <View>
-        <Button
-          preset="primary"
-          style={$button}
-          text="Schedule a Load"
-          onPress={() => (isScheduling ? setIsScheduling(false) : setIsScheduling(true))}
-        />
-      </View>
-    </>
-  )
-}
+          </>
+        );
+      }}
+    </DataLoader>
+  );
+};
 
 const $container: ViewStyle = {
   paddingTop: spacing.xxs,
   paddingBottom: spacing.xxl,
   paddingHorizontal: spacing.lg,
-}
+};
 
 const $title: TextStyle = {
   marginBottom: spacing.lg,
   color: colors.palette.accent600,
-}
+};
 
 const $welcomeLogo: ImageStyle = {
   height: 88,
@@ -317,15 +385,15 @@ const $welcomeLogo: ImageStyle = {
   marginTop: spacing.sm,
   alignContent: "flex-start",
   marginLeft: -80,
-}
+};
 
 const $oyster: ImageStyle = {
   marginBottom: spacing.sm,
   marginTop: spacing.sm,
   height: height - 450,
   width: "100%",
-}
+};
 
 const $button: ViewStyle = {
   marginBottom: spacing.xs,
-}
+};

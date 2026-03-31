@@ -1,394 +1,472 @@
-import React, { FC, useEffect, useState } from "react"
-import { TextStyle, View, ViewStyle, Image, ScrollView, Platform, Alert } from "react-native"
-import { AppStackScreenProps } from "app/navigators"
-import { AvatarSelect, Button, ListItem, Screen, Text, TextField } from "app/components"
-import { colors, spacing } from "app/theme"
-import { useAuthStore } from "app/store"
-import { api } from "app/services/api"
-import type { User } from "app/services/api/api.types"
-import { Titles } from "app/constants/titles"
+import React, { FC, useCallback, useState } from "react";
+import {
+  TextStyle,
+  View,
+  ViewStyle,
+  Image,
+  ScrollView,
+  Platform,
+  Alert,
+} from "react-native";
+import { AppStackScreenProps } from "app/navigators";
+import {
+  AvatarSelect,
+  Button,
+  DataLoader,
+  ListItem,
+  Screen,
+  Text,
+  TextField,
+} from "app/components";
+import { colors, spacing } from "app/theme";
+import { useAuthStore } from "app/store";
+import { api } from "app/services/api";
+import type { User } from "app/services/api/api.types";
+import { Titles } from "app/constants/titles";
 
-import RNPickerSelect from "react-native-picker-select"
-import RNDateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker"
-import { set } from "date-fns"
-import { AVATARS, getAvatarImage } from "app/constants/images"
-import Modal from "react-native-modal"
-import moment from "moment"
+import RNPickerSelect from "react-native-picker-select";
+import RNDateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
+import { set } from "date-fns";
+import { AVATARS, getAvatarImage } from "app/constants/images";
+import Modal from "react-native-modal";
+import moment from "moment";
 
 function getProfileTitle(loads: number) {
-  if (loads < 1) return "No Load Joe"
-  const title = Titles.find((t) => loads < t.loads)?.title
-  return title || Titles[Titles.length - 1].title
+  if (loads < 1) return "No Load Joe";
+  const title = Titles.find((t) => loads < t.loads)?.title;
+  return title || Titles[Titles.length - 1].title;
 }
 
 interface ProfileScreenProps extends AppStackScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
-  const { logout, distributeAuthToken } = useAuthStore()
+  const { logout, distributeAuthToken } = useAuthStore();
 
-  const [profile, setProfile] = useState<User | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [email, setEmail] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [avatar, setAvatar] = useState(1)
+  const [isEditing, setIsEditing] = useState(false);
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [avatar, setAvatar] = useState(1);
 
-  const emailError = isSubmitted ? registerEmailValidationError() : ""
-  const passwordError = isSubmitted ? registerPasswordValidationError() : ""
+  const emailError = isSubmitted ? registerEmailValidationError() : "";
+  const passwordError = isSubmitted ? registerPasswordValidationError() : "";
 
   function registerEmailValidationError() {
-    if (email?.length === 0) return "can't be blank"
-    if (email?.length < 6) return "must be at least 6 characters"
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "must be a valid email address"
-    return ""
+    if (email?.length === 0) return "can't be blank";
+    if (email?.length < 6) return "must be at least 6 characters";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return "must be a valid email address";
+    return "";
   }
 
   function registerPasswordValidationError() {
-    if (newPassword.length > 0 && newPassword.length < 6) return "must be at least 6 characters"
-    return ""
+    if (newPassword.length > 0 && newPassword.length < 6)
+      return "must be at least 6 characters";
+    return "";
   }
 
   function createDate(time: string): Date {
-    const [hours, minutes] = time.split(":").map((t) => parseInt(t))
-    return set(new Date(), { hours, minutes })
+    const [hours, minutes] = time.split(":").map((t) => parseInt(t));
+    return set(new Date(), { hours, minutes });
   }
 
   const formatTime = (date: Date | undefined) => {
-    const hours = date?.getHours()
-    const minutes = date?.getMinutes()
-    return `${hours}:${minutes}`
-  }
+    const hours = date?.getHours();
+    const minutes = date?.getMinutes();
+    return `${hours}:${minutes}`;
+  };
 
-  async function fetchProfile() {
-    const response = await api.getProfile()
+  const fetchProfile = useCallback(async (): Promise<User> => {
+    distributeAuthToken();
+    const response = await api.getProfile();
     if (response.kind === "ok") {
-      setProfile(response.profile)
-      setEmail(response.profile.email)
-      setAvatar(response.profile.avatar)
+      setEmail(response.profile.email);
+      setAvatar(response.profile.avatar);
+      return response.profile;
     }
-  }
-
-  useEffect(() => {
-    distributeAuthToken()
-    fetchProfile().catch((e) => console.log(e))
-  }, [])
-
-  function callUpdateLoadTime(loadTime: number) {
-    if (loadTime === profile?.load_time) return
-    if (loadTime == null) return
-    api.updateLoadTime(loadTime)
-      .then(() => {
-        setProfile((prev) => prev ? { ...prev, load_time: loadTime } : prev)
-      })
-      .catch((e) => console.log(e))
-  }
-
-  function callUpdatePrefTime(preference_id: number, startTime: string, endTime: string) {
-    api.updatePreference(preference_id, startTime, endTime)
-      .then(() => {
-        setProfile((prev) => {
-          if (!prev) return prev
-          return {
-            ...prev,
-            preferences: prev.preferences.map((p) =>
-              p.preference_id === preference_id
-                ? { ...p, start_time: startTime, end_time: endTime }
-                : p,
-            ),
-          }
-        })
-      })
-      .catch((e) => console.log(e))
-  }
-
-  function callEditProfile() {
-    setIsSubmitted(true)
-    if (registerEmailValidationError()) return
-    if (registerPasswordValidationError()) return
-    api.editProfile(email, newPassword, avatar)
-      .then(() => {
-        setProfile((prev) => prev ? { ...prev, email, avatar } : prev)
-        setNewPassword("")
-        setIsEditing(false)
-      })
-      .catch((e) => console.log(e))
-  }
-
-  function callDeleteAccount() {
-    Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        onPress: () => {
-          api.deleteAccount()
-            .then(() => {
-              Alert.alert("Success", "Account will be deleted in 24-48 hours.")
-              logout()
-            })
-            .catch(() => {
-              Alert.alert("Error", "An error occurred. Please try again later")
-            })
-        },
-      },
-    ])
-  }
-
-  const openPreferencePicker = (pref: any, startOrEnd: string) => {
-    DateTimePickerAndroid.open({
-      value: createDate(pref?.[startOrEnd]),
-      mode: "time",
-      minuteInterval: 30,
-      onChange: (event, newTime) => {
-        const time = formatTime(newTime)
-        if (startOrEnd === "start_time")
-          callUpdatePrefTime(pref?.preference_id, time, pref?.end_time)
-        else callUpdatePrefTime(pref?.preference_id, pref?.start_time, time)
-      },
-    })
-  }
+    throw new Error("Failed to load profile");
+  }, []);
 
   const formatAndroidButtonTime = (time: string) => {
-    return moment(time, "HH:mm:ss").format("h:mm a")
-  }
+    return moment(time, "HH:mm:ss").format("h:mm a");
+  };
 
   return (
-    <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
-      <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-        <Image
-          style={{ alignSelf: "flex-start", marginEnd: spacing.md, width: 100, height: 100 }}
-          source={getAvatarImage(profile?.avatar)}
-        />
-        <View>
-          <Text style={$titleStyle} text={profile?.username} />
-          <Text style={$subheaderStyle} text={profile?.email} />
-          <Text style={$subheaderStyle} text={`${profile?.loads} loads shared`} />
-          <Text style={$subheaderStyle} text={profile ? getProfileTitle(profile.loads) : ""} />
-          <Text style={$subheaderStyle} text={`Sharing Loads for ${profile?.memberSince}`} />
-        </View>
-      </View>
-      <Button preset="small" text="Edit Profile" onPress={() => setIsEditing(true)} />
-      <Text preset="subheading" style={{ marginTop: spacing.md }} text="Preferences" />
-      <ListItem
-        text="Load Time"
-        RightComponent={
-          <RNPickerSelect
-            onValueChange={(value) => callUpdateLoadTime(value)}
-            style={{
-              viewContainer: {
-                alignSelf: "center",
-                backgroundColor: colors.palette.accent100,
-                borderRadius: 10,
-                width: 120,
-                height: 40,
-                justifyContent: "center",
-                alignContent: "center",
-                alignItems: "center",
-              },
-              inputIOS: {
-                fontSize: 18,
-              },
-              inputAndroidContainer: {
-                alignSelf: "center",
-                backgroundColor: colors.palette.accent100,
-                borderRadius: 10,
-                width: 120,
-                height: 40,
-                justifyContent: "center",
-                alignContent: "center",
-                alignItems: "center",
-              },
-              inputAndroid: {
-                fontSize: 18,
-                color: colors.palette.accent800,
-              },
-            }}
-            value={profile?.load_time}
-            useNativeAndroidPickerStyle={false}
-            items={[
-              { label: "30 minutes", value: 30 },
-              { label: "60 minutes", value: 60 },
-              { label: "90 minutes", value: 90 },
-              { label: "120 minutes", value: 120 },
-              { label: "150 minutes", value: 150 },
-              { label: "180 minutes", value: 180 },
-            ]}
-          />
+    <DataLoader queryFn={fetchProfile} loadingMessage="Loading profile...">
+      {(profile, refetch) => {
+        function callUpdateLoadTime(loadTime: number) {
+          if (loadTime === profile.load_time) return;
+          if (loadTime == null) return;
+          api
+            .updateLoadTime(loadTime)
+            .then(() => refetch())
+            .catch((e) => console.log(e));
         }
-      />
-      {profile?.preferences.map((pref) => (
-        <ListItem
-          key={pref?.day}
-          text={pref?.day}
-          bottomSeparator={true}
-          RightComponent={
-            <View
-              style={{
-                justifyContent: "center",
-                alignItems: "flex-start",
-                alignSelf: "center",
-                flexDirection: "row",
-              }}
-            >
-              {Platform.OS == "ios" ? (
-                <RNDateTimePicker
-                  mode="time"
-                  minuteInterval={30}
-                  value={createDate(pref?.start_time)}
-                  onChange={(event, newStartTime) => {
-                    const time = formatTime(newStartTime)
-                    callUpdatePrefTime(pref?.preference_id, time, pref?.end_time)
-                  }}
-                />
-              ) : (
-                <Button
-                  style={$prefButton}
-                  preset="small"
-                  text={formatAndroidButtonTime(pref?.start_time)}
-                  onPress={() => openPreferencePicker(pref, "start_time")}
-                  textStyle={{ color: colors.palette.accent800 }}
-                />
-              )}
-              <Text style={{ marginTop: spacing.xxs, marginHorizontal: spacing.xs }} text={`-`} />
 
-              {Platform.OS == "ios" ? (
-                <RNDateTimePicker
-                  mode="time"
-                  minuteInterval={30}
-                  value={createDate(pref?.end_time)}
-                  onChange={(event, newEndTime) => {
-                    const newTime = formatTime(newEndTime)
-                    callUpdatePrefTime(pref?.preference_id, pref?.start_time, newTime)
-                  }}
-                />
-              ) : (
-                <Button
-                  preset="small"
-                  style={$prefButton}
-                  text={formatAndroidButtonTime(pref?.end_time)}
-                  onPress={() => openPreferencePicker(pref, "end_time")}
-                  textStyle={{ color: colors.palette.accent800 }}
-                />
-              )}
-            </View>
-          }
-        />
-      ))}
-      <View style={$buttonContainer}>
-        <Button preset="default" text="Log Out" onPress={logout} />
-        <Button
-          style={{ marginVertical: spacing.sm }}
-          preset="filled"
-          text="Delete Account"
-          onPress={callDeleteAccount}
-        />
-      </View>
-      <Modal
-        isVisible={isEditing}
-        backdropColor="white"
-        backdropOpacity={1}
-        scrollHorizontal={true}
-        coverScreen={true}
-      >
-        <ScrollView style={{ marginTop: spacing.xxxl }}>
-          <Text preset="subheading" style={{ marginBottom: 20 }} text="Edit Profile" />
+        function callUpdatePrefTime(
+          preference_id: number,
+          startTime: string,
+          endTime: string,
+        ) {
+          api
+            .updatePreference(preference_id, startTime, endTime)
+            .then(() => refetch())
+            .catch((e) => console.log(e));
+        }
 
-          <TextField
-            value={profile?.username}
-            editable={false}
-            containerStyle={{ marginBottom: spacing.md }}
-          />
-          <TextField
-            value={email}
-            onChangeText={setEmail}
-            containerStyle={{ marginBottom: spacing.md }}
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            keyboardType="email-address"
-            label="Email"
-            placeholder="Enter your email"
-            helper={emailError}
-            status={emailError ? "error" : undefined}
-          />
-          <Text preset="formLabel" style={{ marginBottom: 20 }} text="Avatar" />
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignContent: "flex-start",
-              flexWrap: "wrap",
-            }}
+        function callEditProfile() {
+          setIsSubmitted(true);
+          if (registerEmailValidationError()) return;
+          if (registerPasswordValidationError()) return;
+          api
+            .editProfile(email, newPassword, avatar)
+            .then(() => {
+              setNewPassword("");
+              setIsEditing(false);
+              refetch();
+            })
+            .catch((e) => console.log(e));
+        }
+
+        function callDeleteAccount() {
+          Alert.alert(
+            "Delete Account",
+            "Are you sure you want to delete your account?",
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Delete",
+                onPress: () => {
+                  api
+                    .deleteAccount()
+                    .then(() => {
+                      Alert.alert(
+                        "Success",
+                        "Account will be deleted in 24-48 hours.",
+                      );
+                      logout();
+                    })
+                    .catch(() => {
+                      Alert.alert(
+                        "Error",
+                        "An error occurred. Please try again later",
+                      );
+                    });
+                },
+              },
+            ],
+          );
+        }
+
+        const openPreferencePicker = (pref: any, startOrEnd: string) => {
+          DateTimePickerAndroid.open({
+            value: createDate(pref[startOrEnd]),
+            mode: "time",
+            minuteInterval: 30,
+            onChange: (event, newTime) => {
+              const time = formatTime(newTime);
+              if (startOrEnd === "start_time")
+                callUpdatePrefTime(pref.preference_id, time, pref.end_time);
+              else
+                callUpdatePrefTime(pref.preference_id, pref.start_time, time);
+            },
+          });
+        };
+
+        return (
+          <Screen
+            preset="scroll"
+            safeAreaEdges={["top"]}
+            contentContainerStyle={$container}
           >
-            {AVATARS.map((group, index) => (
-              <AvatarSelect
-                key={group}
-                avatar={group}
-                selected={index + 1 === avatar}
-                onPress={() => setAvatar(index + 1)}
-              ></AvatarSelect>
+            <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+              <Image
+                style={{
+                  alignSelf: "flex-start",
+                  marginEnd: spacing.md,
+                  width: 100,
+                  height: 100,
+                  borderRadius: 6,
+                }}
+                source={getAvatarImage(profile.avatar)}
+              />
+              <View>
+                <Text style={$titleStyle} text={profile.username} />
+                <Text style={$subheaderStyle} text={profile.email} />
+                <Text
+                  style={$subheaderStyle}
+                  text={`${profile.loads} loads shared`}
+                />
+                <Text
+                  style={$subheaderStyle}
+                  text={getProfileTitle(profile.loads)}
+                />
+                <Text
+                  style={$subheaderStyle}
+                  text={`Sharing Loads for ${profile.memberSince}`}
+                />
+              </View>
+            </View>
+            <Button
+              preset="small"
+              text="Edit Profile"
+              onPress={() => setIsEditing(true)}
+            />
+            <Text
+              preset="subheading"
+              style={{ marginTop: spacing.md }}
+              text="Preferences"
+            />
+            <ListItem
+              text="Load Time"
+              RightComponent={
+                <RNPickerSelect
+                  onValueChange={(value) => callUpdateLoadTime(value)}
+                  style={{
+                    viewContainer: {
+                      alignSelf: "center",
+                      backgroundColor: colors.palette.accent100,
+                      borderRadius: 10,
+                      width: 120,
+                      height: 40,
+                      justifyContent: "center",
+                      alignContent: "center",
+                      alignItems: "center",
+                    },
+                    inputIOS: {
+                      fontSize: 18,
+                    },
+                    inputAndroidContainer: {
+                      alignSelf: "center",
+                      backgroundColor: colors.palette.accent100,
+                      borderRadius: 10,
+                      width: 120,
+                      height: 40,
+                      justifyContent: "center",
+                      alignContent: "center",
+                      alignItems: "center",
+                    },
+                    inputAndroid: {
+                      fontSize: 18,
+                      color: colors.palette.accent800,
+                    },
+                  }}
+                  value={profile.load_time}
+                  useNativeAndroidPickerStyle={false}
+                  items={[
+                    { label: "30 minutes", value: 30 },
+                    { label: "60 minutes", value: 60 },
+                    { label: "90 minutes", value: 90 },
+                    { label: "120 minutes", value: 120 },
+                    { label: "150 minutes", value: 150 },
+                    { label: "180 minutes", value: 180 },
+                  ]}
+                />
+              }
+            />
+            {profile.preferences.map((pref) => (
+              <ListItem
+                key={pref.day}
+                text={pref.day}
+                bottomSeparator={true}
+                RightComponent={
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                      alignSelf: "center",
+                      flexDirection: "row",
+                    }}
+                  >
+                    {Platform.OS == "ios" ? (
+                      <RNDateTimePicker
+                        mode="time"
+                        minuteInterval={30}
+                        value={createDate(pref.start_time)}
+                        onChange={(event, newStartTime) => {
+                          const time = formatTime(newStartTime);
+                          callUpdatePrefTime(
+                            pref.preference_id,
+                            time,
+                            pref.end_time,
+                          );
+                        }}
+                      />
+                    ) : (
+                      <Button
+                        style={$prefButton}
+                        preset="small"
+                        text={formatAndroidButtonTime(pref.start_time)}
+                        onPress={() => openPreferencePicker(pref, "start_time")}
+                        textStyle={{ color: colors.palette.accent800 }}
+                      />
+                    )}
+                    <Text
+                      style={{
+                        marginTop: spacing.xxs,
+                        marginHorizontal: spacing.xs,
+                      }}
+                      text={`-`}
+                    />
+
+                    {Platform.OS == "ios" ? (
+                      <RNDateTimePicker
+                        mode="time"
+                        minuteInterval={30}
+                        value={createDate(pref.end_time)}
+                        onChange={(event, newEndTime) => {
+                          const newTime = formatTime(newEndTime);
+                          callUpdatePrefTime(
+                            pref.preference_id,
+                            pref.start_time,
+                            newTime,
+                          );
+                        }}
+                      />
+                    ) : (
+                      <Button
+                        preset="small"
+                        style={$prefButton}
+                        text={formatAndroidButtonTime(pref.end_time)}
+                        onPress={() => openPreferencePicker(pref, "end_time")}
+                        textStyle={{ color: colors.palette.accent800 }}
+                      />
+                    )}
+                  </View>
+                }
+              />
             ))}
-          </View>
+            <View style={$buttonContainer}>
+              <Button preset="default" text="Log Out" onPress={logout} />
+              <Button
+                style={{ marginVertical: spacing.sm }}
+                preset="filled"
+                text="Delete Account"
+                onPress={callDeleteAccount}
+              />
+            </View>
+            <Modal
+              isVisible={isEditing}
+              backdropColor="white"
+              backdropOpacity={1}
+              scrollHorizontal={true}
+              coverScreen={true}
+            >
+              <ScrollView style={{ marginTop: spacing.xxxl }}>
+                <Text
+                  preset="subheading"
+                  style={{ marginBottom: 20 }}
+                  text="Edit Profile"
+                />
 
-          <TextField
-            value={newPassword}
-            onChangeText={setNewPassword}
-            containerStyle={{ marginBottom: spacing.md }}
-            autoCapitalize="none"
-            autoComplete="off"
-            autoCorrect={false}
-            keyboardType="default"
-            label="Change Password"
-            placeholder="super secret password"
-            helper="Must be at least 6 characters"
-            status={passwordError ? "error" : undefined}
-          />
+                <TextField
+                  value={profile.username}
+                  editable={false}
+                  containerStyle={{ marginBottom: spacing.md }}
+                />
+                <TextField
+                  value={email}
+                  onChangeText={setEmail}
+                  containerStyle={{ marginBottom: spacing.md }}
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  label="Email"
+                  placeholder="Enter your email"
+                  helper={emailError}
+                  status={emailError ? "error" : undefined}
+                />
+                <Text
+                  preset="formLabel"
+                  style={{ marginBottom: 20 }}
+                  text="Avatar"
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignContent: "flex-start",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {AVATARS.map((group, index) => (
+                    <AvatarSelect
+                      key={group}
+                      avatar={group}
+                      selected={index + 1 === avatar}
+                      onPress={() => setAvatar(index + 1)}
+                    ></AvatarSelect>
+                  ))}
+                </View>
 
-          <View style={$buttonContainer}>
-            <Button
-              preset="primary"
-              text="Save"
-              style={{ marginBottom: spacing.sm }}
-              onPress={() => callEditProfile()}
-              disabledStyle={{ backgroundColor: colors.palette.neutral400 }}
-              disabled={emailError !== ""}
-            />
-            <Button
-              preset="default"
-              text="Cancel"
-              onPress={() => {
-                setIsEditing(!isEditing)
-                setAvatar(profile?.avatar || 1)
-                setEmail(profile?.email || "")
-                setNewPassword("")
-              }}
-            />
-          </View>
-        </ScrollView>
-      </Modal>
-    </Screen>
-  )
-}
+                <TextField
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  containerStyle={{ marginBottom: spacing.md }}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  keyboardType="default"
+                  label="Change Password"
+                  placeholder="super secret password"
+                  helper="Must be at least 6 characters"
+                  status={passwordError ? "error" : undefined}
+                />
+
+                <View style={$buttonContainer}>
+                  <Button
+                    preset="primary"
+                    text="Save"
+                    style={{ marginBottom: spacing.sm }}
+                    onPress={() => callEditProfile()}
+                    disabledStyle={{
+                      backgroundColor: colors.palette.neutral400,
+                    }}
+                    disabled={emailError !== ""}
+                  />
+                  <Button
+                    preset="default"
+                    text="Cancel"
+                    onPress={() => {
+                      setIsEditing(!isEditing);
+                      setAvatar(profile.avatar || 1);
+                      setEmail(profile.email || "");
+                      setNewPassword("");
+                    }}
+                  />
+                </View>
+              </ScrollView>
+            </Modal>
+          </Screen>
+        );
+      }}
+    </DataLoader>
+  );
+};
 
 const $container: ViewStyle = {
   paddingTop: spacing.md,
   paddingBottom: spacing.md,
   paddingHorizontal: spacing.lg,
-}
+};
 
 const $prefButton: ViewStyle = {
   backgroundColor: colors.palette.accent100,
-}
+};
 
 const $titleStyle: TextStyle = {
   flexGrow: 1,
   color: colors.palette.primary600,
   fontSize: 25,
-}
+};
 const $subheaderStyle: TextStyle = {
   paddingVertical: spacing.xxxs,
   color: colors.textDim,
-}
+};
 
 const $buttonContainer: ViewStyle = {
   marginVertical: spacing.md,
-}
+};

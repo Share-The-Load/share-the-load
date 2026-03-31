@@ -15,6 +15,7 @@ import { colors } from "app/theme"
 import { MainNavigator, MainNavigatorParamList } from "./MainNavigator"
 
 export type AppStackParamList = {
+  Onboarding: undefined
   Welcome: undefined
   Login: undefined
   Main: NavigatorScreenParams<MainNavigatorParamList>
@@ -42,7 +43,7 @@ function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      initialRouteName={isAuthenticated && hasGroup ? "Welcome" : "Login"}
+      initialRouteName={isAuthenticated && hasGroup && isValidated ? "Main" : isAuthenticated && !hasGroup && isValidated ? "Welcome" : "Onboarding"}
     >
       {isAuthenticated && hasGroup && isValidated ? (
         <>
@@ -55,6 +56,7 @@ function AppStack() {
         </>
       ) : (
         <>
+          <Stack.Screen name="Onboarding" component={Screens.OnboardingScreen} />
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />

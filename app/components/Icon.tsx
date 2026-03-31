@@ -59,6 +59,7 @@ export const iconRegistry = {
   back: require("../../assets/icons/back.png"),
   caretLeft: require("../../assets/icons/caretLeft.png"),
   caretRight: require("../../assets/icons/caretRight.png"),
+  check: require("../../assets/icons/check.png"),
   home: require("../../assets/icons/home.png"),
   hidden: require("../../assets/icons/hidden.png"),
   lock: require("../../assets/icons/lock.png"),
