@@ -3,6 +3,12 @@ export interface ApiGenericResponse {
   message: string
 }
 
+export interface ApiScheduleResponse {
+  status: "success" | "partial"
+  scheduledLoads?: string[]
+  failedLoads?: string[]
+}
+
 export interface Preference {
   preference_id: number
   user_id: number
@@ -19,6 +25,7 @@ export interface User {
   email: string
   avatar: number
   load_time: number
+  onboarding_complete: boolean
   memberSince: string
   loads: number
   preferences: Preference[]
@@ -80,6 +87,42 @@ export interface ApiLoadsResponse {
 
 export interface ApiFetchNewSloganResponse {
   slogan: string
+}
+
+export interface ApiInviteCodeResponse {
+  inviteCode: string
+}
+
+export interface ApiJoinByInviteResponse {
+  group?: Group
+  requiresPasscode?: boolean
+  groupId?: number
+  groupName?: string
+}
+
+export interface LoadTypeCount {
+  type: string
+  count: number
+}
+
+export interface MemberLoadCount {
+  username: string
+  avatar_id: number
+  count: number
+}
+
+export interface InsightsData {
+  user: {
+    totalLoads: number
+    totalMinutes: number
+    loadsByType: LoadTypeCount[]
+  }
+  group: {
+    totalLoads: number
+    totalMinutes: number
+    loadsByType: LoadTypeCount[]
+    loadsPerMember: MemberLoadCount[]
+  }
 }
 
 export interface ApiConfig {

@@ -111,7 +111,7 @@ export const OnboardingScreen: FC<OnboardingScreenProps> = function OnboardingSc
             style={$getStartedButton}
             textStyle={$getStartedText}
             preset="primary"
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate("Register")}
           />
           <Button
             text="I already have an account"

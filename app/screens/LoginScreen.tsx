@@ -12,7 +12,7 @@ import { FloatingBubbles } from "../components/FloatingBubbles"
 import { useAuthStore } from "../store"
 import { AppStackScreenProps } from "../navigators"
 import { colors, spacing } from "../theme"
-import axios from "app/utils/axios"
+import { api } from "app/services/api"
 
 const welcomeLogo = require("../../assets/images/logo.png")
 
@@ -36,7 +36,7 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen(_props) {
     distributeAuthToken,
     setUserGroupId,
     setUserId,
-    setIsValidated,
+    setOnboardingComplete,
   } = useAuthStore()
 
   // Entrance animations
@@ -89,24 +89,22 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen(_props) {
     if (usernameEmailValidationError() != "" || passwordValidationError() != "") return
     setIsLoading(true)
 
-    axios
-      .post("/account/login", { username: authEmailUsername, password: authPassword })
-      .then((res) => {
+    api
+      .login(authEmailUsername, authPassword)
+      .then((data) => {
         setIsSubmitted(false)
         setAuthPassword("")
         setAuthEmailUsername("")
-        if (res.data.user.groupId !== null) setUserGroupId(res.data.user.groupId)
-        setAuthToken(res.data.user.token)
-        setRefreshToken(res.data.user.refreshToken)
+        if (data.user.groupId !== null) setUserGroupId(data.user.groupId)
+        setOnboardingComplete(data.user.onboardingComplete ?? true)
+        setAuthToken(data.user.token)
+        setRefreshToken(data.user.refreshToken)
         distributeAuthToken()
-        setIsValidated(true)
-        setUserId(res.data.user.userId)
+        setUserId(data.user.userId)
         setIsLoading(false)
       })
-      .catch((err) => {
-        if (err.includes("Share the Load is not available")) {
-          setLoginError(err)
-        } else setLoginError("Invalid username or password")
+      .catch(() => {
+        setLoginError("Invalid username or password")
         setIsLoading(false)
       })
   }

@@ -1,12 +1,21 @@
-import React, { ErrorInfo } from "react"
-import { ScrollView, TextStyle, View, ViewStyle } from "react-native"
-import { Button, Icon, Screen, Text } from "../../components"
-import { colors, spacing } from "../../theme"
+import React, { ErrorInfo } from "react";
+import {
+  Image,
+  ImageStyle,
+  ScrollView,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
+import { Button, Screen, Text } from "../../components";
+import { colors, spacing } from "../../theme";
+
+const bugHeader = require("../../../assets/images/bug_header.png");
 
 export interface ErrorDetailsProps {
-  error: Error
-  errorInfo: ErrorInfo | null
-  onReset(): void
+  error: Error;
+  errorInfo: ErrorInfo | null;
+  onReset(): void;
 }
 
 export function ErrorDetails(props: ErrorDetailsProps) {
@@ -17,13 +26,23 @@ export function ErrorDetails(props: ErrorDetailsProps) {
       contentContainerStyle={$contentContainer}
     >
       <View style={$topSection}>
-        <Icon icon="ladybug" size={64} />
-        <Text style={$heading} preset="subheading" text="Something went wrong!" />
-        <Text text="This is the screen that your users will see in production when an error is thrown. You'll want to customize this message and probably the layout as well (`app/screens/ErrorScreen`). If you want to remove this entirely, check `app/app.tsx` for the <ErrorBoundary> component." />
+        <Image source={bugHeader} style={$headerImage} resizeMode="cover" />
+        <Text style={$heading} preset="subheading" text="Uh oh, lost a sock!" />
+        <Text
+          style={$subtitle}
+          text="Something got tangled up in the spin cycle. Don't worry — no laundry was harmed."
+        />
       </View>
 
-      <ScrollView style={$errorSection} contentContainerStyle={$errorSectionContentContainer}>
-        <Text style={$errorContent} weight="bold" text={`${props.error}`.trim()} />
+      <ScrollView
+        style={$errorSection}
+        contentContainerStyle={$errorSectionContentContainer}
+      >
+        <Text
+          style={$errorContent}
+          weight="bold"
+          text={`${props.error}`.trim()}
+        />
         <Text
           selectable
           style={$errorBacktrace}
@@ -35,50 +54,62 @@ export function ErrorDetails(props: ErrorDetailsProps) {
         preset="reversed"
         style={$resetButton}
         onPress={props.onReset}
-        text="RESET APP"
+        text="RESTART THE WASH"
       />
     </Screen>
-  )
+  );
 }
 
 const $contentContainer: ViewStyle = {
   alignItems: "center",
   paddingHorizontal: spacing.lg,
-  paddingTop: spacing.xl,
   flex: 1,
-}
+};
 
 const $topSection: ViewStyle = {
-  flex: 1,
   alignItems: "center",
-}
+  width: "100%",
+};
+
+const $headerImage: ImageStyle = {
+  width: "100%",
+  height: 180,
+  borderRadius: 8,
+  marginBottom: spacing.md,
+};
 
 const $heading: TextStyle = {
   color: colors.error,
-  marginBottom: spacing.md,
-}
+  marginBottom: spacing.xs,
+};
+
+const $subtitle: TextStyle = {
+  textAlign: "center",
+  marginBottom: spacing.sm,
+  color: colors.textDim,
+};
 
 const $errorSection: ViewStyle = {
   flex: 2,
   backgroundColor: colors.separator,
   marginVertical: spacing.md,
   borderRadius: 6,
-}
+};
 
 const $errorSectionContentContainer: ViewStyle = {
   padding: spacing.md,
-}
+};
 
 const $errorContent: TextStyle = {
   color: colors.error,
-}
+};
 
 const $errorBacktrace: TextStyle = {
   marginTop: spacing.md,
   color: colors.textDim,
-}
+};
 
 const $resetButton: ViewStyle = {
   backgroundColor: colors.error,
   paddingHorizontal: spacing.xxl,
-}
+};

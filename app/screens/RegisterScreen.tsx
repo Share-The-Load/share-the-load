@@ -1,5 +1,5 @@
 import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
-import { Alert, ImageStyle, TextInput, TextStyle, ViewStyle, Image, ActivityIndicator, View } from "react-native"
+import { ImageStyle, TextInput, TextStyle, ViewStyle, Image, View } from "react-native"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,8 +11,6 @@ import { AppStackScreenProps } from "app/navigators"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "app/components"
 import { FloatingBubbles } from "app/components/FloatingBubbles"
 import { spacing, colors } from "app/theme"
-import axios from "app/utils/axios"
-import { useAuthStore } from "app/store"
 
 const welcomeLogo = require("../../assets/images/logo.png")
 
@@ -20,24 +18,12 @@ interface RegisterScreenProps extends AppStackScreenProps<"Register"> {}
 
 export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_props) {
   const registerPasswordInput = useRef<TextInput>(null)
-  const registerUsernameInput = useRef<TextInput>(null)
 
   const [registerEmail, setRegisterEmail] = useState("")
   const [registerPassword, setRegisterPassword] = useState("")
-  const [registerUsername, setRegisterUsername] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
-  const [isUsernameTaken, setIsUsernameTaken] = useState(false)
   const { navigation } = _props
-
-  const {
-    setAuthToken,
-    setRefreshToken,
-    distributeAuthToken,
-    setUserId,
-    setIsValidated,
-  } = useAuthStore()
 
   // Entrance animations
   const logoOpacity = useSharedValue(0)
@@ -58,7 +44,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
     return () => {
       setRegisterEmail("")
       setRegisterPassword("")
-      setRegisterUsername("")
     }
   }, [])
 
@@ -72,7 +57,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
   }))
 
   const emailError = isSubmitted ? registerEmailValidationError() : ""
-  const usernameError = isSubmitted ? registerUsernameValidationError() : ""
   const passwordError = isSubmitted ? registerPasswordValidationError() : ""
 
   function registerEmailValidationError() {
@@ -82,63 +66,21 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
     return ""
   }
 
-  function registerUsernameValidationError() {
-    if (registerUsername.length === 0) return "can't be blank"
-    if (registerUsername.length < 5) return "must be at least 5 characters"
-    return ""
-  }
-
   function registerPasswordValidationError() {
     if (registerPassword.length === 0) return "can't be blank"
     if (registerPassword.length < 6) return "must be at least 6 characters"
     return ""
   }
 
-  function checkUsername() {
-    return axios.post(`/account/isUsernameAvailable`, { username: registerUsername })
-  }
-
-  function register() {
+  function continueToOnboarding() {
     setIsSubmitted(true)
     if (registerEmailValidationError()) return
-    if (registerUsernameValidationError()) return
     if (registerPasswordValidationError()) return
-    setIsLoading(true)
-    checkUsername()
-      .then((res) => {
-        if (!res.data.isAvailable) {
-          setIsUsernameTaken(true)
-          setIsLoading(false)
-          throw new Error("Username is not available")
-        } else {
-          axios
-            .post("/account/register", {
-              email: registerEmail,
-              username: registerUsername,
-              password: registerPassword,
-            })
-            .then((res) => {
-              setIsSubmitted(false)
-              setRegisterPassword("")
-              setRegisterUsername("")
-              setRegisterEmail("")
-              setAuthToken(res.data.user.token)
-              setRefreshToken(res.data.user.refreshToken)
-              setUserId(res.data.user.userId)
-              setIsValidated(true)
-              distributeAuthToken()
-              setIsLoading(false)
-            })
-            .catch((err) => {
-              setIsLoading(false)
-              Alert.alert("Error", "An error occurred while registering")
-            })
-        }
-      })
-      .catch((err) => {
-        setIsLoading(false)
-        Alert.alert("Error", "An error occurred while checking username availability")
-      })
+
+    navigation.navigate("OnboardingFlow", {
+      email: registerEmail,
+      password: registerPassword,
+    })
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -178,8 +120,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
             style={$subheading}
           />
 
-          {isLoading && <ActivityIndicator style={$loader} color={colors.palette.primary600} />}
-
           <TextField
             value={registerEmail}
             onChangeText={setRegisterEmail}
@@ -192,23 +132,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
             placeholder="Enter your email"
             helper={emailError}
             status={emailError ? "error" : undefined}
-            onSubmitEditing={() => registerUsernameInput.current?.focus()}
-          />
-
-          <TextField
-            ref={registerUsernameInput}
-            value={registerUsername}
-            onChangeText={setRegisterUsername}
-            containerStyle={$textField}
-            autoCapitalize="none"
-            autoComplete="username"
-            autoCorrect={false}
-            keyboardType="default"
-            label="Username"
-            placeholder="Choose a username"
-            helper={usernameError}
-            secondHelper={isUsernameTaken ? "username is taken" : ""}
-            status={usernameError ? "error" : isUsernameTaken ? "error" : undefined}
             onSubmitEditing={() => registerPasswordInput.current?.focus()}
           />
 
@@ -223,7 +146,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
             secureTextEntry={isAuthPasswordHidden}
             label="Password"
             placeholder="Create a password"
-            onSubmitEditing={register}
+            onSubmitEditing={continueToOnboarding}
             helper={passwordError}
             status={passwordError ? "error" : undefined}
             RightAccessory={PasswordRightAccessory}
@@ -231,11 +154,11 @@ export const RegisterScreen: FC<RegisterScreenProps> = function RegisterScreen(_
 
           <Button
             testID="register-button"
-            text="Create Account"
+            text="Continue"
             style={$primaryButton}
             textStyle={$primaryButtonText}
             preset="primary"
-            onPress={register}
+            onPress={continueToOnboarding}
           />
 
           <View style={$divider}>
@@ -307,10 +230,6 @@ const $subheading: TextStyle = {
   color: colors.palette.accent500,
   fontSize: 16,
   lineHeight: 22,
-}
-
-const $loader: ViewStyle = {
-  marginBottom: spacing.sm,
 }
 
 const $textField: ViewStyle = {

@@ -11,7 +11,7 @@ import { AppStackScreenProps } from "app/navigators"
 import { Button, Screen, Text, TextField } from "app/components"
 import { FloatingBubbles } from "app/components/FloatingBubbles"
 import { spacing, colors } from "app/theme"
-import axios from "app/utils/axios"
+import { api } from "app/services/api"
 
 const welcomeLogo = require("../../assets/images/logo.png")
 
@@ -67,8 +67,8 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> =
       if (validationError()) return
 
       setIsLoading(true)
-      axios
-        .post("/account/forgot-password", { emailUsername: emailOrUsername })
+      api
+        .forgotPassword(emailOrUsername)
         .then(() => {
           setIsLoading(false)
           Alert.alert(

@@ -1,8 +1,16 @@
 import React, { FC, useRef, useState } from "react"
-import { Alert, TextStyle, ViewStyle, TextInput, ActivityIndicator } from "react-native"
+import {
+  Alert,
+  TextStyle,
+  ViewStyle,
+  TextInput,
+  ActivityIndicator,
+  View,
+  TouchableOpacity,
+} from "react-native"
 import { AppStackScreenProps } from "app/navigators"
 import { Button, GroupItem, Screen, Text, TextField, Toggle } from "app/components"
-import { spacing } from "app/theme"
+import { colors, spacing } from "app/theme"
 import { useAuthStore } from "app/store"
 import { api } from "app/services/api"
 import type { Group } from "app/services/api/api.types"
@@ -138,9 +146,7 @@ export const GroupScreen: FC<GroupScreenProps> = function GroupScreen(_props) {
     ])
   }
 
-  function changeMode() {
-    setMode(mode === "find" ? "create" : "find")
-  }
+  const isFind = mode === "find"
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={$container}>
@@ -148,50 +154,96 @@ export const GroupScreen: FC<GroupScreenProps> = function GroupScreen(_props) {
       <Text
         text="History is written by the ones with clean clothes"
         preset="subheading"
-        style={$enterDetails}
+        style={$subtitle}
       />
 
-      {mode === "find" ? (
-        <>
-          <TextField
-            value={searchGroupName}
-            onChangeText={setSearchGroupName}
-            containerStyle={$textField}
-            autoCapitalize="none"
-            autoComplete="off"
-            autoCorrect={false}
-            keyboardType="default"
-            label="Group Name"
-            placeholder="Super Cleaners"
-            onSubmitEditing={search}
+      {/* Tab Switcher */}
+      <View style={$tabContainer}>
+        <TouchableOpacity
+          style={[$tab, isFind && $tabActive]}
+          onPress={() => setMode("find")}
+          activeOpacity={0.7}
+        >
+          <Text
+            text="Find Group"
+            style={[$tabText, isFind && $tabTextActive]}
           />
-          <Button preset="default" text="Search" style={$button} onPress={search} />
-          <Button preset="primary" text="Create Group" style={$button} onPress={changeMode} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[$tab, !isFind && $tabActive]}
+          onPress={() => setMode("create")}
+          activeOpacity={0.7}
+        >
+          <Text
+            text="Create Group"
+            style={[$tabText, !isFind && $tabTextActive]}
+          />
+        </TouchableOpacity>
+      </View>
 
-          <Text preset="heading" text="Groups Found" style={$bottomTitle} />
+      {isFind ? (
+        <>
+          <View style={$section}>
+            <TextField
+              value={searchGroupName}
+              onChangeText={setSearchGroupName}
+              containerStyle={$textField}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
+              keyboardType="default"
+              label="Group Name"
+              placeholder="Super Cleaners"
+              onSubmitEditing={search}
+            />
+            <Button preset="default" text="Search" style={$searchButton} onPress={search} />
+          </View>
 
-          <ActivityIndicator animating={isLoading} />
-          {searchedGroups.length > 0 ? (
-            <>
-              {searchedGroups.map((group) => (
-                <GroupItem
-                  key={group.group_id}
-                  text={group?.name}
-                  bottomSeparator={true}
-                  hasPasscode={group?.hasPasscode}
-                  membersCount={group?.numberOfMembers}
-                  owner={group?.ownerName}
-                  avatarId={group?.avatar_id}
-                  onPress={() => joinGroup(group)}
+          <View style={$resultsSection}>
+            <Text preset="formLabel" text="RESULTS" style={$resultsLabel} />
+            <View style={$resultsDivider} />
+
+            {isLoading ? (
+              <ActivityIndicator style={$loader} />
+            ) : searchedGroups.length > 0 ? (
+              <View style={$resultsList}>
+                {searchedGroups.map((group) => (
+                  <GroupItem
+                    key={group.group_id}
+                    text={group?.name}
+                    bottomSeparator={true}
+                    hasPasscode={group?.hasPasscode}
+                    membersCount={group?.numberOfMembers}
+                    owner={group?.ownerName}
+                    avatarId={group?.avatar_id}
+                    onPress={() => joinGroup(group)}
+                  />
+                ))}
+              </View>
+            ) : hasSearched ? (
+              <View style={$emptyState}>
+                <Text
+                  preset="subheading"
+                  text="No groups found"
+                  style={$emptyTitle}
                 />
-              ))}
-            </>
-          ) : hasSearched && searchedGroups.length === 0 ? (
-            <Text preset="subheading" text="No groups found!" />
-          ) : null}
+                <Text
+                  text="Try a different name or create your own group"
+                  style={$emptyHint}
+                />
+              </View>
+            ) : (
+              <View style={$emptyState}>
+                <Text
+                  text="Search for a group to join"
+                  style={$emptyHint}
+                />
+              </View>
+            )}
+          </View>
         </>
       ) : (
-        <>
+        <View style={$section}>
           <TextField
             value={groupName}
             onChangeText={setGroupName}
@@ -231,11 +283,10 @@ export const GroupScreen: FC<GroupScreenProps> = function GroupScreen(_props) {
               onSubmitEditing={createGroup}
             />
           )}
-          <ActivityIndicator animating={isLoading} />
+          {isLoading && <ActivityIndicator style={$loader} />}
 
-          <Button text="Create Group" style={$button} onPress={createGroup} />
-          <Button preset="primary" text="Find Group" style={$button} onPress={changeMode} />
-        </>
+          <Button text="Create Group" style={$createButton} onPress={createGroup} />
+        </View>
       )}
     </Screen>
   )
@@ -248,25 +299,120 @@ const $container: ViewStyle = {
 }
 
 const $title: TextStyle = {
+  marginBottom: spacing.xxs,
+}
+
+const $subtitle: TextStyle = {
+  marginBottom: spacing.xl,
+  color: colors.textDim,
+}
+
+const $tabContainer: ViewStyle = {
+  flexDirection: "row",
+  backgroundColor: colors.palette.neutral300,
+  borderRadius: 10,
+  padding: spacing.xxxs,
+  marginBottom: spacing.lg,
+}
+
+const $tab: ViewStyle = {
+  flex: 1,
+  paddingVertical: spacing.sm,
+  alignItems: "center",
+  borderRadius: 8,
+}
+
+const $tabActive: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.15,
+  shadowRadius: 2,
+  elevation: 2,
+}
+
+const $tabText: TextStyle = {
+  color: colors.textDim,
+  fontSize: 15,
+  fontWeight: "500",
+}
+
+const $tabTextActive: TextStyle = {
+  color: colors.palette.primary700,
+  fontWeight: "600",
+}
+
+const $section: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 12,
+  padding: spacing.md,
   marginBottom: spacing.md,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 2,
 }
 
-const $bottomTitle: TextStyle = {
-  marginBottom: spacing.xxxs,
-  marginTop: spacing.xl,
+const $searchButton: ViewStyle = {
+  marginTop: spacing.xxs,
 }
 
-const $button: ViewStyle = {
+const $createButton: ViewStyle = {
+  marginTop: spacing.xs,
+}
+
+const $resultsSection: ViewStyle = {
+  marginTop: spacing.xs,
+}
+
+const $resultsLabel: TextStyle = {
+  color: colors.textDim,
+  fontSize: 13,
+  letterSpacing: 1,
   marginBottom: spacing.xs,
+}
+
+const $resultsDivider: ViewStyle = {
+  height: 1,
+  backgroundColor: colors.separator,
+  marginBottom: spacing.sm,
+}
+
+const $resultsList: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 12,
+  padding: spacing.sm,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 2,
+}
+
+const $emptyState: ViewStyle = {
+  alignItems: "center",
+  paddingVertical: spacing.xxl,
+}
+
+const $emptyTitle: TextStyle = {
+  marginBottom: spacing.xs,
+  color: colors.palette.neutral600,
+}
+
+const $emptyHint: TextStyle = {
+  color: colors.textDim,
+  fontSize: 14,
+}
+
+const $loader: ViewStyle = {
+  marginVertical: spacing.md,
 }
 
 const $toggleStyle: ViewStyle = {
   marginBottom: spacing.md,
 }
 
-const $enterDetails: TextStyle = {
-  marginBottom: spacing.xl,
-}
 const $textField: ViewStyle = {
-  marginBottom: spacing.lg,
+  marginBottom: spacing.md,
 }

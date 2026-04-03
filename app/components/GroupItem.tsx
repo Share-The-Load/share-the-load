@@ -60,21 +60,25 @@ export const GroupItem = function GroupItem(props: GroupItemProps) {
 
   return (
     <View style={$containerStyles}>
-      <TouchableOpacity {...TouchableOpacityProps} style={$touchableStyles}>
+      <TouchableOpacity {...TouchableOpacityProps} style={$touchableStyles} activeOpacity={0.7}>
         <Image
-          style={{ alignSelf: "center", marginEnd: spacing.md, width: 50, height: 50 }}
+          style={$avatar}
           source={getGroupImage(avatarId)}
         />
         <View style={$textContainer}>
-          <Text text={text} style={$titleStyle}></Text>
-          <Text text={`Owner: ${owner}`} style={$subheaderStyle}></Text>
-        </View>
-
-        {hasPasscode && <Icon containerStyle={$lockIcon} icon="lock" />}
-
-        <View style={$iconContainer}>
-          <Text text={(membersCount ?? 0).toString()} style={{ marginRight: spacing.xxs }} />
-          <Icon size={24} icon="people" />
+          <Text text={text} style={$titleStyle} numberOfLines={1} />
+          <Text text={`Owner: ${owner}`} style={$subheaderStyle} numberOfLines={1} />
+          <View style={$metaRow}>
+            <Icon size={16} icon="people" color={colors.textDim} />
+            <Text text={`${membersCount ?? 0} members`} style={$metaText} />
+            {hasPasscode && (
+              <>
+                <View style={$metaDot} />
+                <Icon size={14} icon="lock" color={colors.textDim} />
+                <Text text="Passcode" style={$metaText} />
+              </>
+            )}
+          </View>
         </View>
       </TouchableOpacity>
     </View>
@@ -84,8 +88,8 @@ export const GroupItem = function GroupItem(props: GroupItemProps) {
 const $textContainer: ViewStyle = {
   justifyContent: "center",
   alignItems: "flex-start",
-  alignSelf: "center",
   flexGrow: 1,
+  flexShrink: 1,
 }
 
 const $separatorTop: ViewStyle = {
@@ -98,33 +102,47 @@ const $separatorBottom: ViewStyle = {
   borderBottomColor: colors.separator,
 }
 
-const $titleStyle: TextStyle = {
-  paddingTop: spacing.xs,
-  flexGrow: 1,
-  flexShrink: 1,
-  color: colors.palette.primary600,
-  fontSize: 25,
+const $avatar: any = {
+  width: 52,
+  height: 52,
+  borderRadius: 12,
+  marginRight: spacing.sm,
 }
+
+const $titleStyle: TextStyle = {
+  color: colors.palette.primary700,
+  fontSize: 17,
+  fontWeight: "600",
+  marginBottom: spacing.xxxs,
+}
+
 const $subheaderStyle: TextStyle = {
-  paddingVertical: spacing.xxs,
-  flexGrow: 1,
-  flexShrink: 1,
+  color: colors.text,
+  fontSize: 14,
+  marginBottom: spacing.xxs,
+}
+
+const $metaRow: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+}
+
+const $metaText: TextStyle = {
   color: colors.textDim,
+  fontSize: 13,
+  marginLeft: spacing.xxxs,
+}
+
+const $metaDot: ViewStyle = {
+  width: 3,
+  height: 3,
+  borderRadius: 1.5,
+  backgroundColor: colors.palette.neutral400,
+  marginHorizontal: spacing.xs,
 }
 
 const $touchableStyle: ViewStyle = {
   flexDirection: "row",
-  alignItems: "flex-start",
-}
-
-const $iconContainer: ViewStyle = {
-  justifyContent: "center",
   alignItems: "center",
-  alignSelf: "center",
-  flexDirection: "row",
-  marginLeft: spacing.md,
-}
-const $lockIcon: ViewStyle = {
-  alignSelf: "center",
-  flexDirection: "row",
+  paddingVertical: spacing.sm,
 }

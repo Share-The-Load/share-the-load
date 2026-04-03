@@ -7,7 +7,11 @@ import type {
   ApiGenericResponse,
   ApiGroupsResponse,
   ApiFetchNewSloganResponse,
+  ApiInviteCodeResponse,
+  ApiJoinByInviteResponse,
   ApiLoadsResponse,
+  ApiScheduleResponse,
+  InsightsData,
   Group,
   GroupDay,
   User,
@@ -45,6 +49,30 @@ export class Api {
       const problem = getGeneralApiProblem(e as AxiosError)
       return { ok: false, problem }
     }
+  }
+
+  async login(username: string, password: string): Promise<any> {
+    const result = await this.request("post", "/account/login", { username, password })
+    if (result.ok) return result.data
+    throw new Error("Invalid username or password")
+  }
+
+  async isUsernameAvailable(username: string): Promise<any> {
+    const result = await this.request("post", "/account/isUsernameAvailable", { username })
+    if (result.ok) return result.data
+    throw new Error("Error checking username availability")
+  }
+
+  async register(email: string, username: string, password: string): Promise<any> {
+    const result = await this.request("post", "/account/register", { email, username, password })
+    if (result.ok) return result.data
+    throw new Error("Error registering account")
+  }
+
+  async forgotPassword(emailUsername: string): Promise<any> {
+    const result = await this.request("post", "/account/forgot-password", { emailUsername })
+    if (result.ok) return result.data
+    throw new Error("Error sending password reset")
   }
 
   async validateToken(token: string | undefined): Promise<any> {
@@ -138,10 +166,10 @@ export class Api {
     return { kind: "ok", days: result.data?.days }
   }
 
-  async schedule(loads: any[], urgent: boolean): Promise<{ kind: "ok" } | GeneralApiProblem> {
-    const result = await this.request<ApiGenericResponse>("post", `/schedule`, { loads, urgent })
+  async schedule(loads: any[], urgent: boolean): Promise<{ kind: "ok"; status: "success" | "partial"; failedLoads?: string[] } | GeneralApiProblem> {
+    const result = await this.request<ApiScheduleResponse>("post", `/schedule`, { loads, urgent })
     if (!result.ok) return result.problem
-    return { kind: "ok" }
+    return { kind: "ok", status: result.data.status, failedLoads: result.data.failedLoads }
   }
 
   async deleteLoad(loadId: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
@@ -163,10 +191,34 @@ export class Api {
     return { kind: "ok" }
   }
 
+  async completeOnboarding(): Promise<{ kind: "ok" } | GeneralApiProblem> {
+    const result = await this.request<ApiGenericResponse>("post", `/complete-onboarding`)
+    if (!result.ok) return result.problem
+    return { kind: "ok" }
+  }
+
   async editProfile(email: string, password: string, avatar_id: number): Promise<{ kind: "ok" } | GeneralApiProblem> {
     const result = await this.request<ApiGenericResponse>("post", `/edit-profile`, { password, email, avatar: avatar_id })
     if (!result.ok) return result.problem
     return { kind: "ok" }
+  }
+
+  async getInsights(): Promise<{ kind: "ok"; insights: InsightsData } | GeneralApiProblem> {
+    const result = await this.request<InsightsData>("get", `/insights`)
+    if (!result.ok) return result.problem
+    return { kind: "ok", insights: result.data }
+  }
+
+  async getInviteCode(groupId: number): Promise<{ kind: "ok"; inviteCode: string } | GeneralApiProblem> {
+    const result = await this.request<ApiInviteCodeResponse>("get", `/group-invite-code/${groupId}`)
+    if (!result.ok) return result.problem
+    return { kind: "ok", inviteCode: result.data.inviteCode }
+  }
+
+  async joinGroupByInvite(inviteCode: string, passcode?: string): Promise<{ kind: "ok"; group?: Group; requiresPasscode?: boolean; groupId?: number; groupName?: string } | GeneralApiProblem> {
+    const result = await this.request<ApiJoinByInviteResponse>("post", `/join-group-by-invite`, { inviteCode, passcode })
+    if (!result.ok) return result.problem
+    return { kind: "ok", ...result.data }
   }
 
   async deleteAccount(): Promise<{ kind: "ok" } | GeneralApiProblem> {

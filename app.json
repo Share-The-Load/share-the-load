@@ -12,11 +12,6 @@
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-all.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/images/splash-logo-all.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#C7E0EF"
-    },
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
       "package": "com.sharetheload.app",
@@ -24,34 +19,24 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
-      },
-      "splash": {
-        "image": "./assets/images/splash-logo-android-universal.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#C7E0EF"
       }
     },
     "ios": {
       "icon": "./assets/images/app-icon-ios.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.sharetheload.app",
-      "buildNumber": "5",
-      "splash": {
-        "image": "./assets/images/splash-logo-ios-mobile.png",
-        "tabletImage": "./assets/images/splash-logo-ios-tablet.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#C7E0EF"
-      }
+      "buildNumber": "5"
     },
-    "web": {
-      "favicon": "./assets/images/app-icon-web-favicon.png",
-      "splash": {
-        "image": "./assets/images/splash-logo-web.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#C7E0EF"
-      },
-      "bundler": "metro"
-    },
-    "plugins": ["@react-native-community/datetimepicker", "expo-font"]
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#C7E0EF",
+          "image": "./assets/images/logo.png"
+        }
+      ]
+    ]
   }
 }

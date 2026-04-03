@@ -21,6 +21,7 @@ export type AppStackParamList = {
   Main: NavigatorScreenParams<MainNavigatorParamList>
   Group: { mode: "find" | "create" }
   Register: undefined
+  OnboardingFlow: { email?: string; password?: string } | undefined
   Profile: undefined
   GroupHome: undefined
   ForgotPassword: undefined
@@ -38,18 +39,31 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 function AppStack() {
   const isAuthenticated = useAuthStore((s) => !!s.authToken)
   const hasGroup = useAuthStore((s) => !!s.userGroupId)
-  const isValidated = useAuthStore((s) => s.validated)
+  const onboardingComplete = useAuthStore((s) => s.onboardingComplete)
+
+  const getInitialRoute = () => {
+    if (isAuthenticated) {
+      if (!onboardingComplete) return "OnboardingFlow"
+      if (hasGroup) return "Main"
+      return "Welcome"
+    }
+    return "Onboarding"
+  }
 
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, navigationBarColor: colors.background }}
-      initialRouteName={isAuthenticated && hasGroup && isValidated ? "Main" : isAuthenticated && !hasGroup && isValidated ? "Welcome" : "Onboarding"}
+      initialRouteName={getInitialRoute()}
     >
-      {isAuthenticated && hasGroup && isValidated ? (
+      {isAuthenticated && !onboardingComplete ? (
+        <>
+          <Stack.Screen name="OnboardingFlow" component={Screens.OnboardingFlowScreen} />
+        </>
+      ) : isAuthenticated && hasGroup && onboardingComplete ? (
         <>
           <Stack.Screen name="Main" component={MainNavigator} />
         </>
-      ) : isAuthenticated && !hasGroup && isValidated ? (
+      ) : isAuthenticated && !hasGroup && onboardingComplete ? (
         <>
           <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
           <Stack.Screen name="Group" component={Screens.GroupScreen} />
@@ -59,6 +73,7 @@ function AppStack() {
           <Stack.Screen name="Onboarding" component={Screens.OnboardingScreen} />
           <Stack.Screen name="Login" component={Screens.LoginScreen} />
           <Stack.Screen name="Register" component={Screens.RegisterScreen} />
+          <Stack.Screen name="OnboardingFlow" component={Screens.OnboardingFlowScreen} />
           <Stack.Screen name="ForgotPassword" component={Screens.ForgotPasswordScreen} />
         </>
       )}

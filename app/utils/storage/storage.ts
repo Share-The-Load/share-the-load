@@ -1,48 +1,51 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import { createMMKV } from "react-native-mmkv"
 
-export async function loadString(key: string): Promise<string | null> {
+export const mmkvStorage = createMMKV()
+console.log("[mmkv] instance:", typeof mmkvStorage, mmkvStorage != null, Object.keys(mmkvStorage || {}))
+
+export function loadString(key: string): string | null {
   try {
-    return await AsyncStorage.getItem(key)
+    return mmkvStorage.getString(key) ?? null
   } catch {
     return null
   }
 }
 
-export async function saveString(key: string, value: string): Promise<boolean> {
+export function saveString(key: string, value: string): boolean {
   try {
-    await AsyncStorage.setItem(key, value)
+    mmkvStorage.set(key, value)
     return true
   } catch {
     return false
   }
 }
 
-export async function load(key: string): Promise<unknown | null> {
+export function load(key: string): unknown | null {
   try {
-    const almostThere = await AsyncStorage.getItem(key)
-    return JSON.parse(almostThere ?? "")
+    const value = mmkvStorage.getString(key)
+    return value ? JSON.parse(value) : null
   } catch {
     return null
   }
 }
 
-export async function save(key: string, value: unknown): Promise<boolean> {
+export function save(key: string, value: unknown): boolean {
   try {
-    await AsyncStorage.setItem(key, JSON.stringify(value))
+    mmkvStorage.set(key, JSON.stringify(value))
     return true
   } catch {
     return false
   }
 }
 
-export async function remove(key: string): Promise<void> {
+export function remove(key: string): void {
   try {
-    await AsyncStorage.removeItem(key)
-  } catch {}
+    mmkvStorage.remove(key)
+  } catch { }
 }
 
-export async function clear(): Promise<void> {
+export function clear(): void {
   try {
-    await AsyncStorage.clear()
-  } catch {}
+    mmkvStorage.clearAll()
+  } catch { }
 }

@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useState } from "react";
 import {
   TextStyle,
+  TouchableOpacity,
   View,
   ViewStyle,
   Image,
@@ -13,6 +14,7 @@ import {
   AvatarSelect,
   Button,
   DataLoader,
+  Icon,
   ListItem,
   Screen,
   Text,
@@ -24,7 +26,6 @@ import { api } from "app/services/api";
 import type { User } from "app/services/api/api.types";
 import { Titles } from "app/constants/titles";
 
-import RNPickerSelect from "react-native-picker-select";
 import RNDateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
@@ -45,6 +46,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   const { logout, distributeAuthToken } = useAuthStore();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoadTimePicker, setIsLoadTimePicker] = useState(false);
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -222,50 +224,87 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
             <ListItem
               text="Load Time"
               RightComponent={
-                <RNPickerSelect
-                  onValueChange={(value) => callUpdateLoadTime(value)}
+                <Button
+                  preset="small"
+                  text={`${profile.load_time} minutes`}
                   style={{
-                    viewContainer: {
-                      alignSelf: "center",
-                      backgroundColor: colors.palette.accent100,
-                      borderRadius: 10,
-                      width: 120,
-                      height: 40,
-                      justifyContent: "center",
-                      alignContent: "center",
-                      alignItems: "center",
-                    },
-                    inputIOS: {
-                      fontSize: 18,
-                    },
-                    inputAndroidContainer: {
-                      alignSelf: "center",
-                      backgroundColor: colors.palette.accent100,
-                      borderRadius: 10,
-                      width: 120,
-                      height: 40,
-                      justifyContent: "center",
-                      alignContent: "center",
-                      alignItems: "center",
-                    },
-                    inputAndroid: {
-                      fontSize: 18,
-                      color: colors.palette.accent800,
-                    },
+                    alignSelf: "center",
+                    backgroundColor: colors.palette.accent100,
+                    borderRadius: 10,
+                    minWidth: 120,
+                    height: 40,
+                    justifyContent: "center",
                   }}
-                  value={profile.load_time}
-                  useNativeAndroidPickerStyle={false}
-                  items={[
-                    { label: "30 minutes", value: 30 },
-                    { label: "60 minutes", value: 60 },
-                    { label: "90 minutes", value: 90 },
-                    { label: "120 minutes", value: 120 },
-                    { label: "150 minutes", value: 150 },
-                    { label: "180 minutes", value: 180 },
-                  ]}
+                  textStyle={{ color: colors.palette.accent800, fontSize: 18 }}
+                  onPress={() => setIsLoadTimePicker(true)}
                 />
               }
             />
+            <Modal
+              isVisible={isLoadTimePicker}
+              onBackdropPress={() => setIsLoadTimePicker(false)}
+              style={{ justifyContent: "flex-end", margin: 0 }}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  padding: spacing.lg,
+                }}
+              >
+                <Text
+                  preset="subheading"
+                  text="Load Time"
+                  style={{ marginBottom: spacing.md }}
+                />
+                {[30, 60, 90, 120, 150, 180].map((minutes) => {
+                  const isSelected = profile.load_time === minutes;
+                  return (
+                    <TouchableOpacity
+                      key={minutes}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingVertical: spacing.sm,
+                        paddingHorizontal: spacing.md,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.separator,
+                      }}
+                      onPress={() => {
+                        callUpdateLoadTime(minutes);
+                        setIsLoadTimePicker(false);
+                      }}
+                    >
+                      <Text
+                        text={`${minutes} minutes`}
+                        style={{
+                          fontSize: 18,
+                          color: isSelected
+                            ? colors.palette.primary600
+                            : colors.text,
+                          fontWeight: isSelected ? "bold" : "normal",
+                        }}
+                      />
+                      {isSelected && (
+                        <Icon
+                          icon="check"
+                          size={20}
+                          color={colors.palette.primary600}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+                <Button
+                  preset="default"
+                  text="Cancel"
+                  style={{ marginTop: spacing.md }}
+                  onPress={() => setIsLoadTimePicker(false)}
+                />
+              </View>
+            </Modal>
             {profile.preferences.map((pref) => (
               <ListItem
                 key={pref.day}

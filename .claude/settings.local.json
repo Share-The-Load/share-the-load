@@ -9,7 +9,9 @@
       "Bash(npx create-expo-app@latest share-the-load-new --template blank-typescript)",
       "Bash(npx expo:*)",
       "Bash(cp:*)",
-      "Bash(do cp:*)"
+      "Bash(do cp:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn remove:*)"
     ]
   }
 }
