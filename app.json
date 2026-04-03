@@ -8,7 +8,7 @@
         "projectId": "4044f554-684f-49e8-9b20-ee0a29e9e3c2"
       }
     },
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-all.png",
     "userInterfaceStyle": "light",
@@ -25,7 +25,18 @@
       "icon": "./assets/images/app-icon-ios.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.sharetheload.app",
-      "buildNumber": "5"
+      "appleTeamId": "4TAB3LTKA2",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
+      }
     },
     "plugins": [
       "@react-native-community/datetimepicker",
