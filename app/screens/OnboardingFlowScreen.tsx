@@ -830,6 +830,7 @@ const $groupChoiceCardAlt: ViewStyle = {
 
 const $groupChoiceEmoji: TextStyle = {
   fontSize: 36,
+  lineHeight: 48,
   textAlign: "center",
   marginBottom: spacing.sm,
   color: colors.palette.primary600,

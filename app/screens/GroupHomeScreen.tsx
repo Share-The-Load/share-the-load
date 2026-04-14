@@ -5,10 +5,12 @@ import {
   Image,
   TextStyle,
   Alert,
+  Platform,
   ScrollView,
   Share,
 } from "react-native";
 import { AppStackScreenProps } from "app/navigators";
+import Config from "app/config";
 import {
   AvatarSelect,
   Button,
@@ -186,10 +188,21 @@ export const GroupHomeScreen: FC<GroupHomeScreenProps> =
               distributeAuthToken();
               const response = await api.getInviteCode(yourGroup.group_id);
               if (response.kind === "ok") {
-                const url = `share-the-load://invite/${response.inviteCode}`;
-                await Share.share({
-                  message: `Join my group "${yourGroup.name}" on Share The Load! ${url}`,
-                });
+                const url = `${Config.API_URL}/invite/${response.inviteCode}`;
+                await Share.share(
+                  Platform.OS === "ios"
+                    ? {
+                        url,
+                        title: `Join "${yourGroup.name}" on Share The Load!`,
+                        message: `Join my group "${yourGroup.name}" on Share The Load!`,
+                      }
+                    : {
+                        message: `Join my group "${yourGroup.name}" on Share The Load! ${url}`,
+                      },
+                  {
+                    subject: `Join "${yourGroup.name}" on Share The Load!`,
+                  },
+                );
               } else {
                 Alert.alert("Error", "Could not generate invite link");
               }
