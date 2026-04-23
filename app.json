@@ -15,7 +15,6 @@
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
       "package": "com.sharetheload.app",
-      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
